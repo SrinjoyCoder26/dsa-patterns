@@ -4,7 +4,7 @@ A single, beginner-friendly study document for cracking coding interviews and co
 
 ## Quick start (no setup)
 1. Open [`index.html`](./index.html) in your browser.
-2. Stay on **Step 01 — Recognize** (the Sliding Window pattern is preloaded).
+2. Stay on **Step 01 — Recognize** (the first pattern is preloaded).
 3. Scroll down to the **Visualization 👁️** and **Execution Trace 🖥️** sections to see the algorithm’s step-by-step output.
 4. Use **Glossary** for unknown terms and **Cheat Sheet** to compare patterns side-by-side.
 
