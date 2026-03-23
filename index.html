@@ -229,6 +229,53 @@ body::before {
 }
 .section-sub { font-size: 14px; color: var(--text2); max-width: 620px; line-height: 1.65; }
 
+/* ─── BEGINNER STARTER ─── */
+.start-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.start-title {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.start-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+.start-steps {
+  margin: 0 0 12px 16px;
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.start-steps li { margin-bottom: 6px; }
+.start-note {
+  font-size: 12px;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.legend-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+
 /* ─── PATTERN GRID ─── */
 .pattern-grid {
   display: grid;
@@ -688,11 +735,11 @@ body::before {
   <div class="hero-glow"></div>
   <div class="hero-eyebrow">// DSA Pattern Recognition System</div>
   <h1>Break the<br><span>Pattern.</span></h1>
-  <p class="hero-desc">Stop memorizing solutions. Start recognizing structures. 15 patterns cover 90% of all coding interview questions — learn to see them in under 2 minutes.</p>
+  <p class="hero-desc">Stop memorizing solutions. Start recognizing structures. Each pattern includes a beginner-friendly intuition, a template, a step-by-step visualization, and an execution trace so you can see exactly what the code does.</p>
   <div class="hero-stats">
-    <div class="stat"><span class="stat-num">15</span><span class="stat-label">core patterns</span></div>
+    <div class="stat"><span class="stat-num" id="pattern-count">0</span><span class="stat-label">patterns with visuals</span></div>
     <div class="stat"><span class="stat-num">3R</span><span class="stat-label">framework</span></div>
-    <div class="stat"><span class="stat-num">12</span><span class="stat-label">drill questions</span></div>
+    <div class="stat"><span class="stat-num" id="drill-count">0</span><span class="stat-label">drill questions</span></div>
     <div class="stat"><span class="stat-num">~2min</span><span class="stat-label">pattern ID target</span></div>
   </div>
 </div>
@@ -715,7 +762,22 @@ body::before {
   <div class="section-header">
     <div class="section-tag">Step 01 — Recognize</div>
     <div class="section-title">See the pattern in 2 minutes</div>
-    <div class="section-sub">Tap any pattern to see its recognition signals, core idea, code template, and classic problems. Train your eye on the signal phrases — those are the keywords that reveal structure.</div>
+    <div class="section-sub">Tap any pattern to see its recognition signals, core idea, code template, pitfalls, and a worked example. Each example includes a step-by-step visualization and a real execution trace so you can watch the algorithm run.</div>
+  </div>
+  <div class="start-card">
+    <div class="start-title">Start here (3 minutes)</div>
+    <div class="start-sub">If this is your first time, follow this exact order so nothing feels fragmented.</div>
+    <ol class="start-steps">
+      <li>Pick a pattern card below (we preload <strong>Sliding Window</strong> as a starter).</li>
+      <li>Read the <strong>Beginner Intuition</strong> and <strong>Recognition Signals</strong> to understand when it applies.</li>
+      <li>Scroll to the example to see the <strong>Visualization</strong> and <strong>Execution Trace</strong> that show the code’s output step-by-step.</li>
+      <li>Use the <strong>Glossary</strong> tab whenever a term feels unfamiliar.</li>
+    </ol>
+    <div class="start-note">Tip: After one pattern, go to the Cheat Sheet to compare patterns side-by-side.</div>
+    <div class="legend-row">
+      <span class="legend-pill">👁️ Visualization = step-by-step state changes</span>
+      <span class="legend-pill">🖥️ Execution Trace = printed run/output logs</span>
+    </div>
   </div>
   <div class="pattern-grid" id="pattern-grid"></div>
   <div id="detail-panel-wrap" style="display:none">
@@ -1665,7 +1727,7 @@ function renderPatterns() {
     </div>`).join('');
 }
 
-function showDetail(id) {
+function showDetail(id, shouldScroll = true) {
   const p = patterns.find(x => x.id === id);
   document.querySelectorAll('.pcard').forEach(c => c.classList.remove('active'));
   document.getElementById('pcard-' + id).classList.add('active');
@@ -1728,7 +1790,9 @@ function showDetail(id) {
       </div>` : ''}
     </div>`;
   document.getElementById('detail-panel-wrap').style.display = 'block';
-  document.getElementById('detail-panel-wrap').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  if (shouldScroll) {
+    document.getElementById('detail-panel-wrap').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
 }
 
 // ─── RENDER RECONCILE ───
@@ -1861,6 +1925,13 @@ function renderCheatsheet() {
     </div>`).join('');
 }
 
+function renderStats() {
+  const patternCountEl = document.getElementById('pattern-count');
+  if (patternCountEl) patternCountEl.textContent = patterns.length;
+  const drillCountEl = document.getElementById('drill-count');
+  if (drillCountEl) drillCountEl.textContent = drillQuestions.length;
+}
+
 // ─── NAV ───
 function switchPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1872,7 +1943,11 @@ function switchPage(name) {
 }
 
 // ─── INIT ───
+renderStats();
 renderPatterns();
+if (patterns.length) {
+  showDetail(patterns[0].id, false);
+}
 renderReconcile();
 renderRecall();
 initDrill();
