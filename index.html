@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern Breaker — Coding Interview Pattern System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --bg4: #22222e;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8e8f0;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+  --accent: #7c6dfa;
+  --accent2: #a594ff;
+  --accent-glow: rgba(124,109,250,0.15);
+  --green: #2dd4a0;
+  --green-bg: rgba(45,212,160,0.08);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.08);
+  --coral: #f87171;
+  --coral-bg: rgba(248,113,113,0.08);
+  --blue: #60a5fa;
+  --blue-bg: rgba(96,165,250,0.08);
+  --pink: #f472b6;
+  --pink-bg: rgba(244,114,182,0.08);
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+  --body: 'DM Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── NOISE OVERLAY ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
+/* ─── HERO ─── */
+.hero {
+  position: relative;
+  padding: 80px 40px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--accent2);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp .6s ease forwards .1s;
+}
+
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -.03em;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp .6s ease forwards .2s;
+}
+
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent2) 0%, var(--green) 60%, var(--blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  font-size: 17px;
+  color: var(--text2);
+  max-width: 580px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: fadeUp .6s ease forwards .3s;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 36px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp .6s ease forwards .4s;
+}
+
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-num {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-label { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+
+.hero-glow {
+  position: absolute;
+  top: 0; right: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(ellipse, rgba(124,109,250,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── NAV ─── */
+.nav-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+
+.nav-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 16px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: color .2s;
+  white-space: nowrap;
+  position: relative;
+}
+.nav-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 18px; right: 18px;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform .2s;
+  border-radius: 1px;
+}
+.nav-btn:hover { color: var(--text2); }
+.nav-btn.active { color: var(--accent2); }
+.nav-btn.active::after { transform: scaleX(1); }
+
+/* ─── MAIN LAYOUT ─── */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── SECTION HEADERS ─── */
+.section-header { margin-bottom: 32px; }
+.section-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+.section-sub { font-size: 14px; color: var(--text2); max-width: 620px; line-height: 1.65; }
+
+/* ─── PATTERN GRID ─── */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.pcard {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .15s;
+  position: relative;
+  overflow: hidden;
+}
+.pcard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-glow);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.pcard:hover { border-color: var(--border2); transform: translateY(-2px); }
+.pcard:hover::before { opacity: 1; }
+.pcard.active { border-color: var(--accent); background: var(--bg3); }
+.pcard.active::before { opacity: 1; }
+
+.pcard-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.tag-ARRAY { background: rgba(124,109,250,0.15); color: var(--accent2); }
+.tag-TREE { background: var(--green-bg); color: var(--green); }
+.tag-GRAPH { background: var(--amber-bg); color: var(--amber); }
+.tag-DP { background: var(--coral-bg); color: var(--coral); }
+.tag-STRING { background: var(--pink-bg); color: var(--pink); }
+.tag-LIST { background: var(--blue-bg); color: var(--blue); }
+.tag-BIT { background: rgba(255,255,255,0.08); color: var(--text); }
+
+.pcard-name {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.pcard-hint { font-size: 12px; color: var(--text3); line-height: 1.45; }
+
+/* ─── DETAIL PANEL ─── */
+.detail-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 28px 32px;
+  animation: fadeIn .25s ease;
+}
+
+.detail-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.detail-name {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .detail-grid { grid-template-columns: 1fr; } }
+
+.detail-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.detail-val { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+.signal-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.signal-pill {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--bg4);
+  color: var(--text2);
+  border: 1px solid var(--border);
+  font-family: var(--mono);
+}
+
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text2);
+  white-space: pre;
+  overflow-x: auto;
+  grid-column: 1 / -1;
+}
+
+.detail-problem {
+  grid-column: 1 / -1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 10px;
+}
+.dp-head { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.dp-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; font-style: italic; }
+.dp-code { background: #0a0a0f; border-radius: 8px; padding: 16px; overflow-x: auto; font-family: var(--mono); font-size: 12px; color: #a594ff; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05); }
+.dp-exp { font-size: 13px; color: var(--text2); line-height: 1.6; background: rgba(45,212,160,0.05); border-left: 2px solid var(--green); padding: 12px 16px; border-radius: 4px; }
+
+.prob-list { display: flex; flex-direction: column; gap: 6px; }
+.prob-item {
+  font-size: 12px;
+  padding: 6px 10px;
+  background: var(--bg3);
+  border-radius: 6px;
+  color: var(--text2);
+  border-left: 2px solid var(--accent);
+}
+
+.complexity-row { display: flex; gap: 16px; }
+.cx-badge {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--accent2);
+}
+
+/* ─── FRAMEWORK STEPS ─── */
+.steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 700px) { .steps-grid { grid-template-columns: 1fr; } }
+
+.step-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  transition: border-color .2s;
+}
+.step-card:hover { border-color: var(--border2); }
+
+.step-num-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.step-num {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.sn-purple { background: rgba(124,109,250,0.15); color: var(--accent2); }
+.sn-green { background: var(--green-bg); color: var(--green); }
+.sn-blue { background: var(--blue-bg); color: var(--blue); }
+.sn-amber { background: var(--amber-bg); color: var(--amber); }
+.step-name-txt {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.step-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 12px; }
+.step-checklist { display: flex; flex-direction: column; gap: 5px; }
+.step-check {
+  font-size: 12px;
+  color: var(--text3);
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.step-check::before { content: '›'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+
+/* ─── RECALL ─── */
+.recall-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.recall-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 20px;
+  transition: border-color .2s;
+}
+.recall-card:hover { border-color: var(--border2); }
+.recall-num {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--bg4);
+  line-height: 1;
+  padding-top: 2px;
+}
+.recall-title { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.recall-desc { font-size: 13px; color: var(--text2); line-height: 1.65; }
+.recall-list { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.recall-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  background: var(--bg4);
+  color: var(--text3);
+  border: 1px solid var(--border);
+}
+
+/* ─── DRILL ─── */
+.drill-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.drill-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.drill-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.drill-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+.drill-progress-label { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+.drill-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  animation: fadeIn .3s ease;
+}
+.drill-qnum { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: .08em; margin-bottom: 14px; }
+.drill-question { font-size: 16px; color: var(--text); line-height: 1.65; margin-bottom: 24px; font-weight: 400; }
+.drill-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+@media (max-width: 600px) { .drill-options { grid-template-columns: 1fr; } }
+
+.drill-opt {
+  padding: 12px 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  font-family: var(--body);
+  line-height: 1.4;
+}
+.drill-opt:hover { border-color: var(--border2); background: var(--bg4); color: var(--text); }
+.drill-opt.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.drill-opt.wrong { border-color: var(--coral); background: var(--coral-bg); color: var(--coral); }
+.drill-opt:disabled { cursor: default; }
+
+.drill-feedback {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+  display: none;
+  margin-bottom: 20px;
+  animation: fadeIn .3s ease;
+}
+.drill-feedback.show { display: block; }
+.drill-feedback strong { color: var(--text); }
+
+.drill-footer { display: flex; justify-content: space-between; align-items: center; }
+.drill-score { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+.drill-next {
+  padding: 10px 22px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+  display: none;
+}
+.drill-next:hover { opacity: .88; transform: translateY(-1px); }
+.drill-next.show { display: block; }
+
+.drill-complete {
+  text-align: center;
+  padding: 60px 32px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.drill-score-big {
+  font-family: var(--display);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--accent2), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.drill-complete-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+.drill-restart {
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--accent2);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: all .15s;
+}
+.drill-restart:hover { background: var(--accent-glow); }
+
+/* ─── CHEAT SHEET ─── */
+.cs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 36px;
+}
+.cs-table th {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.cs-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.cs-table tr:last-child td { border-bottom: none; }
+.cs-table tr:hover td { background: var(--bg2); }
+.cs-table .pname { font-family: var(--display); font-weight: 600; color: var(--text); font-size: 13px; }
+.cs-table .tc { font-family: var(--mono); font-size: 12px; color: var(--accent2); }
+.cs-table .when { font-size: 12px; color: var(--text3); }
+
+.signal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.signal-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.signal-phrase {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  font-style: italic;
+}
+.signal-pattern {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ─── GLOSSARY ─── */
+.glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.glossary-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: border-color .2s;
+}
+.glossary-card:hover { border-color: var(--border2); }
+.glossary-term { font-family: var(--mono); font-size: 14px; color: var(--accent2); margin-bottom: 8px; font-weight: 500; }
+.glossary-def { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 600px) {
+  .hero { padding: 48px 20px 40px; }
+  .main { padding: 32px 20px; }
+  .nav { padding: 0 20px; }
+  .nav-btn { padding: 14px 12px; font-size: 10px; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .steps-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── VISUALIZATION & OUTPUT ─── */
+.dp-vis-title, .dp-out-title { margin-top: 24px; font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--accent2); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.dp-vis-title::before { content: '👁️'; font-size: 14px; }
+.dp-out-title::before { content: '🖥️'; font-size: 14px; }
+.dp-vis { background: #0a0a0f; border-radius: 8px; padding: 16px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; }
+.vis-frame { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+.vis-frame:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.vis-desc { font-family: var(--body); font-size: 14px; color: var(--text2); line-height: 1.5; }
+.vis-array { display: flex; gap: 4px; font-family: var(--mono); font-size: 14px; margin: 8px 0; }
+.vis-cell { min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); position: relative; font-weight: 500; }
+.vis-cell.active { border-color: var(--accent); background: rgba(124,109,250,0.15); color: var(--accent2); z-index: 2; }
+.vis-cell.target { border-color: var(--green); background: rgba(45,212,160,0.15); color: var(--green); }
+.vis-cell.warning { border-color: var(--coral); background: rgba(248,113,113,0.15); color: var(--coral); }
+.vis-ptr { position: absolute; bottom: -22px; font-size: 11px; color: var(--green); font-weight: 700; white-space: nowrap; pointer-events: none; z-index: 5; }
+.vis-ptr.top { bottom: auto; top: -22px; color: var(--accent2); }
+.dp-out { background: #050508; border-radius: 8px; padding: 16px; overflow-x: auto; font-family: var(--mono); font-size: 12px; color: #a594ff; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+.out-line { display: block; margin-bottom: 4px; }
+.out-comment { color: var(--text3); font-style: italic; display: block; margin-bottom: 8px; }
+.out-bold { color: #fff; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">// DSA Pattern Recognition System</div>
+  <h1>Break the<br><span>Pattern.</span></h1>
+  <p class="hero-desc">Stop memorizing solutions. Start recognizing structures. 15 patterns cover 90% of all coding interview questions — learn to see them in under 2 minutes.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">15</span><span class="stat-label">core patterns</span></div>
+    <div class="stat"><span class="stat-num">3R</span><span class="stat-label">framework</span></div>
+    <div class="stat"><span class="stat-num">12</span><span class="stat-label">drill questions</span></div>
+    <div class="stat"><span class="stat-num">~2min</span><span class="stat-label">pattern ID target</span></div>
+  </div>
+</div>
+
+<div class="nav-wrap">
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchPage('recognize')">01 Recognize</button>
+    <button class="nav-btn" onclick="switchPage('reconcile')">02 Reconcile</button>
+    <button class="nav-btn" onclick="switchPage('recall')">03 Recall</button>
+    <button class="nav-btn" onclick="switchPage('drill')">Pattern Drill</button>
+    <button class="nav-btn" onclick="switchPage('cheatsheet')">Cheat Sheet</button>
+    <button class="nav-btn" onclick="switchPage('glossary')">Glossary</button>
+  </nav>
+</div>
+
+<main class="main">
+
+<!-- ═══ RECOGNIZE ═══ -->
+<div id="page-recognize" class="page active">
+  <div class="section-header">
+    <div class="section-tag">Step 01 — Recognize</div>
+    <div class="section-title">See the pattern in 2 minutes</div>
+    <div class="section-sub">Tap any pattern to see its recognition signals, core idea, code template, and classic problems. Train your eye on the signal phrases — those are the keywords that reveal structure.</div>
+  </div>
+  <div class="pattern-grid" id="pattern-grid"></div>
+  <div id="detail-panel-wrap" style="display:none">
+    <div class="detail-panel" id="detail-panel"></div>
+  </div>
+</div>
+
+<!-- ═══ RECONCILE ═══ -->
+<div id="page-reconcile" class="page">
+  <div class="section-header">
+    <div class="section-tag">Step 02 — Reconcile</div>
+    <div class="section-title">Bridge problem → approach → code</div>
+    <div class="section-sub">Once you recognize the pattern, reconcile means building the explicit mental bridge. Why this pattern? What's the invariant? Which template? Most people skip this and go straight to code — that's how bugs happen.</div>
+  </div>
+  <div class="steps-grid" id="reconcile-steps"></div>
+</div>
+
+<!-- ═══ RECALL ═══ -->
+<div id="page-recall" class="page">
+  <div class="section-header">
+    <div class="section-tag">Step 03 — Recall</div>
+    <div class="section-title">Build retrieval, not recognition</div>
+    <div class="section-sub">Recognition — seeing an answer and going "oh yeah" — is useless in an interview. You need active recall: producing the pattern cold, from a blank file, under pressure. Here's the system.</div>
+  </div>
+  <div class="recall-grid" id="recall-steps"></div>
+</div>
+
+<!-- ═══ DRILL ═══ -->
+<div id="page-drill" class="page">
+  <div class="section-header">
+    <div class="section-tag">Pattern Drill</div>
+    <div class="section-title">Identify the pattern. No code.</div>
+    <div class="section-sub">Read the problem statement. Pick the pattern. Target time: under 30 seconds per question. This is the skill that matters in the first 2 minutes of any interview.</div>
+  </div>
+  <div class="drill-wrap" id="drill-wrap"></div>
+</div>
+
+<!-- ═══ CHEAT SHEET ═══ -->
+<div id="page-cheatsheet" class="page">
+  <div class="section-header">
+    <div class="section-tag">Reference</div>
+    <div class="section-title">Pattern complexity cheat sheet</div>
+    <div class="section-sub">Canonical time/space complexities and when-to-use triggers. Interviewers will ask. Memorize these.</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:40px">
+    <table class="cs-table" id="cs-table"></table>
+  </div>
+  <div class="section-title" style="font-size:20px;margin-bottom:10px">Signal → Pattern lookup</div>
+  <div class="section-sub" style="margin-bottom:20px">These phrases in a problem statement are pattern triggers. Internalize them.</div>
+  <div class="signal-grid" id="signal-grid"></div>
+</div>
+
+<!-- ═══ GLOSSARY ═══ -->
+<div id="page-glossary" class="page">
+  <div class="section-header">
+    <div class="section-tag">Reference</div>
+    <div class="section-title">Common Terminology</div>
+    <div class="section-sub">Beginners often get stuck on fancy words. Here is the plain English translation of interview jargon.</div>
+  </div>
+  <div class="glossary-grid" id="glossary-grid"></div>
+</div>
+
+</main>
+
+<script>
+const patterns = [
+{ id:'sw', name:'Sliding Window', tag:'ARRAY', hint:'Contiguous subarray/substring optimization',
+    signals:['contiguous subarray','length k window','max/min subarray sum','at most k distinct','longest with constraint'],
+    approach:'Maintain a window [left, right]. Expand right, shrink left when the window violates your invariant. Each element enters and exits the window at most once → O(n) total.',
+    template:`left = 0\nfor right in range(n):\n    # add arr[right] to window state\n    while window_invalid():\n        # remove arr[left] from state\n        left += 1\n    # update answer with current window`,
+    problems:['Max sum subarray of size k','Longest substring without repeating chars','Minimum window substring','Fruit into baskets','Max consecutive ones III'],
+    time:'O(n)', space:'O(1) or O(k)',
+    beginnerIntuition: 'Imagine taking a photo with a rectangular frame. You slide the frame to the right. When the frame grabs something bad (rule violation), you pull the left side of the frame in until the view is good again.',
+    pitfalls: ['Updating the maximum length AFTER the left pointer moves, instead of BEFORE (or vice versa, depending on the loop structure).', 'Using this on arrays with negative numbers for sum targets (negative numbers break the "expanding the window always increases the sum" rule!).'],
+    exampleProblem: {
+      title: "LeetCode 1004. Max Consecutive Ones III",
+      desc: "Given a binary array <code>nums</code> and an integer <code>k</code>, return the maximum number of consecutive <code>1</code>'s in the array if you can flip at most <code>k</code> <code>0</code>'s.",
+      ccode: `int longestOnes(int* nums, int numsSize, int k) {\n    int left = 0, right = 0;\n    int zeros = 0, max_len = 0;\n    \n    while (right < numsSize) {\n        if (nums[right] == 0) zeros++;\n        \n        while (zeros > k) {\n            if (nums[left] == 0) zeros--;\n            left++;\n        }\n        \n        int len = right - left + 1;\n        if (len > max_len) max_len = len;\n        \n        right++;\n    }\n    return max_len;\n}`,
+      explanation: "We expand <code>right</code> to include new elements. Every time we encounter a <code>0</code>, we increment our zero count. If <code>zeros</code> exceeds <code>k</code>, our window is strictly invalid, so we increment <code>left</code> until <code>zeros</code> drops back to <code>k</code>. At every valid step, we record the maximum length.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 1: Expand Window</b><br><code>k = 1</code> (can flip 1 zero). We expand <code>right</code> (R). The first <code>0</code> is acceptable.</div>
+  <div class="vis-array">
+    <div class="vis-cell active">1<span class="vis-ptr top">L</span></div><div class="vis-cell active">1</div><div class="vis-cell active warning">0<span class="vis-ptr">R</span></div>
+    <div class="vis-cell">0</div><div class="vis-cell">1</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 2: Invariant Broken</b><br>R moves to the next <code>0</code>. We now have 2 zeros, but <code>k = 1</code>. Window is INVALID.</div>
+  <div class="vis-array">
+    <div class="vis-cell active warning">1<span class="vis-ptr top">L</span></div><div class="vis-cell active warning">1</div><div class="vis-cell active warning">0</div>
+    <div class="vis-cell active warning">0<span class="vis-ptr">R</span></div><div class="vis-cell">1</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 3: Shrink Window</b><br>L moves forward repeatedly until one <code>0</code> is kicked out of the window. Valid again!</div>
+  <div class="vis-array">
+    <div class="vis-cell">1</div><div class="vis-cell">1</div><div class="vis-cell">0</div>
+    <div class="vis-cell active warning">0<span class="vis-ptr top">L</span><span class="vis-ptr">R</span></div><div class="vis-cell">1</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: nums = [1,1,0,0,1], k = 1</span>
+<span class="out-line">Start: L=0, R=0, zeros=0, max_len=0</span>
+<span class="out-line">R=0 (val 1) -> zeros=0 <= 1 (Valid) -> max_len = max(0, 1) = 1</span>
+<span class="out-line">R=1 (val 1) -> zeros=0 <= 1 (Valid) -> max_len = max(1, 2) = 2</span>
+<span class="out-line">R=2 (val 0) -> zeros=1 <= 1 (Valid) -> max_len = max(2, 3) = 3</span>
+<span class="out-line">R=3 (val 0) -> zeros=2 > 1  <span class="out-bold">(INVALID)</span></span>
+<span class="out-line">  -> Shrinking: L=0 (val 1) drops out, zeros=2</span>
+<span class="out-line">  -> Shrinking: L=1 (val 1) drops out, zeros=2</span>
+<span class="out-line">  -> Shrinking: L=2 (val 0) drops out, zeros=1 <span class="out-bold">(VALID AGAIN)</span> -> L becomes 3</span>
+<span class="out-line">R=3 valid window [0] -> len = 3 - 3 + 1 = 1. max_len remains 3</span>
+<span class="out-line">R=4 (val 1) -> zeros=1 <= 1 (Valid) -> len = 4 - 3 + 1 = 2. max_len remains 3</span>
+<span class="out-bold">Final output: 3</span>`
+    }
+  },
+
+  { id:'tp', name:'Two Pointers', tag:'ARRAY', hint:'Sorted array, pair/triplet/palindrome',
+    signals:['sorted array','find pair with sum','remove duplicates in-place','palindrome check','two indices moving'],
+    approach:'Two pointers moving opposite or same direction, exploiting sorted order to prune candidates. Same direction for fast/slow (duplicates, linked list cycle). Opposite for pair sums.',
+    template:`lo, hi = 0, len(arr) - 1\nwhile lo < hi:\n    s = arr[lo] + arr[hi]\n    if s == target:\n        return [lo, hi]\n    elif s < target:\n        lo += 1\n    else:\n        hi -= 1`,
+    problems:['Two Sum II (sorted input)','3Sum','Container with most water','Valid palindrome','Trapping rain water'],
+    time:'O(n)', space:'O(1)',
+    beginnerIntuition: 'Think of looking for a matching pair of shoes in a sorted line. You check the smallest and largest ones. If they are too small together, you move to the next smallest. Too large, move to the next largest.',
+    pitfalls: ['Forgetting to sort the array first if it isn\'t already sorted.', 'Infinite loops caused by not updating the pointers (`lo += 1` or `hi -= 1`) in all conditional branches.', 'Handling duplicates wrong in problems like 3Sum.'],
+    exampleProblem: {
+      title: "LeetCode 167. Two Sum II - Input array is sorted",
+      desc: "Given a 1-indexed array of integers <code>numbers</code> that is already sorted in non-decreasing order, find two numbers such that they add up to a specific <code>target</code> number.",
+      ccode: `int* twoSum(int* numbers, int numbersSize, int target, int* returnSize) {\n    int left = 0, right = numbersSize - 1;\n    int* res = malloc(2 * sizeof(int));\n    *returnSize = 2;\n    \n    while (left < right) {\n        int sum = numbers[left] + numbers[right];\n        if (sum == target) {\n            res[0] = left + 1; res[1] = right + 1;\n            return res;\n        } else if (sum < target) {\n            left++;\n        } else {\n            right--;\n        }\n    }\n    return res;\n}`,
+      explanation: "Because the array is sorted, the smallest value is on the left and largest on the right. If their sum is strictly too small, only increasing the left pointer can possibly reach the target. If strictly too large, only decreasing the right pointer works.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Target = 9</b><br>Initial pointers at extremes. Sum = <code>2 + 15 = 17</code>. 17 is TOO BIG. We must decrease sum, so we move right pointer down.</div>
+  <div class="vis-array">
+    <div class="vis-cell active">2<span class="vis-ptr top">Left</span></div><div class="vis-cell">7</div><div class="vis-cell">11</div><div class="vis-cell active warning">15<span class="vis-ptr">Right</span></div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 2</b><br>Sum = <code>2 + 11 = 13</code>. Still TOO BIG. Move right pointer again.</div>
+  <div class="vis-array">
+    <div class="vis-cell active">2<span class="vis-ptr top">Left</span></div><div class="vis-cell">7</div><div class="vis-cell active warning">11<span class="vis-ptr">Right</span></div><div class="vis-cell">15</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 3</b><br>Sum = <code>2 + 7 = 9</code>. Match found!</div>
+  <div class="vis-array">
+    <div class="vis-cell target">2<span class="vis-ptr top">Left</span></div><div class="vis-cell target">7<span class="vis-ptr">Right</span></div><div class="vis-cell">11</div><div class="vis-cell">15</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: numbers = [2, 7, 11, 15], target = 9</span>
+<span class="out-line">Start: left=0 (val 2), right=3 (val 15)</span>
+<span class="out-line">Checking sum: 2 + 15 = 17</span>
+<span class="out-line">17 > 9 -> Result too big. Safely discard 15. right-- (becomes 2)</span>
+<span class="out-line">Checking sum: 2 + 11 = 13</span>
+<span class="out-line">13 > 9 -> Result too big. Safely discard 11. right-- (becomes 1)</span>
+<span class="out-line">Checking sum: 2 + 7 = 9</span>
+<span class="out-line">9 == 9 -> <span class="out-bold">Target reached!</span></span>
+<span class="out-bold">Final output: [1, 2] (1-indexed)</span>`
+    }
+  },
+
+  { id:'bs', name:'Binary Search', tag:'ARRAY', hint:'Sorted input, O(log n) search, minimize-the-max',
+    signals:['sorted array','O(log n) search','find first/last position','minimize the maximum','binary answer space'],
+    approach:'lo/hi/mid. Key insight: binary search works on any monotonic answer space, not just arrays. Define what makes a mid value "valid" → adjust bounds. Works for minimization/maximization too.',
+    template:`lo, hi = 0, len(arr) - 1\nwhile lo <= hi:\n    mid = (lo + hi) // 2\n    if arr[mid] == target:\n        return mid\n    elif arr[mid] < target:\n        lo = mid + 1\n    else:\n        hi = mid - 1\nreturn -1`,
+    problems:['Binary search','Search in rotated sorted array','Find peak element','Koko eating bananas','Median of two sorted arrays'],
+    time:'O(log n)', space:'O(1)',
+    beginnerIntuition: 'Like looking up a word in a dictionary. You open it to the middle. If the word you want is later in the alphabet, you tear the left half of the book away and repeat.',
+    pitfalls: ['Off-by-one errors leading to infinite loops (e.g., `lo = mid` instead of `lo = mid + 1`).', 'Integer overflow when computing mid in languages like Java/C++ (`mid = lo + (hi - lo) / 2` is safer).'],
+    exampleProblem: {
+      title: "LeetCode 35. Search Insert Position",
+      desc: "Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.",
+      ccode: `int searchInsert(int* nums, int numsSize, int target) {\n    int left = 0, right = numsSize - 1;\n    while (left <= right) {\n        // Prevents integer overflow for massive array sizes\n        int mid = left + (right - left) / 2;\n        \n        if (nums[mid] == target) {\n            return mid;\n        } else if (nums[mid] < target) {\n            left = mid + 1;\n        } else {\n            right = mid - 1;\n        }\n    }\n    // Left points to the first value greater than target\n    return left;\n}`,
+      explanation: "Standard binary search implementation. If the exact value isn't found, the bounds eventually cross over (<code>left > right</code>). At that exact crossover moment, <code>left</code> represents the insertion index where the element strictly belongs.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Target = 2</b><br>Initial window covers all elements. <code>mid</code> = index 1 (value 3). 3 is &gt; 2, so target must be on the left half.</div>
+  <div class="vis-array">
+    <div class="vis-cell">1<span class="vis-ptr top">Left</span></div><div class="vis-cell active target">3<span class="vis-ptr top">Mid</span></div><div class="vis-cell">5</div><div class="vis-cell">6<span class="vis-ptr">Right</span></div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 2</b><br>Discard right half. <code>right = mid - 1</code> = 0. Now both <code>Left</code> and <code>Right</code> are at index 0. <code>mid</code> = 0 (value 1). 1 &lt; 2, so target must be strictly greater than 1.</div>
+  <div class="vis-array">
+    <div class="vis-cell active target">1<span class="vis-ptr top">L,R, M</span></div><div class="vis-cell">3</div><div class="vis-cell">5</div><div class="vis-cell">6</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Step 3</b><br><code>left = mid + 1</code>. Left becomes 1, Right is 0. <b>Left > Right</b>! Loop terminates. Left (1) is the correct insertion order.</div>
+  <div class="vis-array">
+    <div class="vis-cell">1<span class="vis-ptr top">Right</span></div><div class="vis-cell active">3<span class="vis-ptr top" style="color:var(--coral)">Left (1)</span></div><div class="vis-cell">5</div><div class="vis-cell">6</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: nums = [1, 3, 5, 6], target = 2</span>
+<span class="out-line">Start: left=0, right=3</span>
+<span class="out-line">Loop (0 <= 3):</span>
+<span class="out-line">  mid = 0 + (3-0)/2 = 1.  nums[1] = 3</span>
+<span class="out-line">  3 > 2 -> Target is leftwards. right = mid - 1 = 0</span>
+<span class="out-line">Loop (0 <= 0):</span>
+<span class="out-line">  mid = 0 + (0-0)/2 = 0.  nums[0] = 1</span>
+<span class="out-line">  1 < 2 -> Target is rightwards. left = mid + 1 = 1</span>
+<span class="out-line">Loop (1 <= 0) == <span class="out-bold">FALSE (Break)</span></span>
+<span class="out-bold">Final output: Left pointer = 1 (Target belongs at index 1)</span>`
+    }
+  },
+
+  { id:'bfs', name:'BFS', tag:'GRAPH', hint:'Shortest path, min steps, level-order traversal',
+    signals:['shortest path','minimum steps to reach','level by level','word ladder','nearest cell','minimum jumps'],
+    approach:'Queue + visited set. Process nodes level by level — the first time you reach any node IS the shortest path. Use collections.deque for O(1) popleft. Track visited before enqueue, not after dequeue.',
+    template:`from collections import deque\nq = deque([start])\nvisited = {start}\nsteps = 0\nwhile q:\n    for _ in range(len(q)):  # process level\n        node = q.popleft()\n        for nb in graph[node]:\n            if nb not in visited:\n                visited.add(nb)\n                q.append(nb)\n    steps += 1`,
+    problems:['Binary tree level order traversal','Shortest path in binary matrix','Word ladder','Rotten oranges','01 matrix'],
+    time:'O(V + E)', space:'O(V)',
+    beginnerIntuition: 'Throwing a pebble into a pond. The ripples expand outwards in circles. You explore everyone 1 step away, then everyone 2 steps away. First time an expanding ripple hits the target, that is the shortest path.',
+    pitfalls: ['Marking nodes as visited when popping from the queue instead of when pushing to the queue (this causes massive duplicate work).', 'Using a regular list `pop(0)` instead of a proper double-ended queue, destroying performance.'],
+    exampleProblem: {
+      title: "LeetCode 111. Minimum Depth of Binary Tree",
+      desc: "Given a binary tree, find its minimum depth (the number of nodes along the shortest path from the root down to the nearest leaf node).",
+      ccode: `int minDepth(struct TreeNode* root) {\n    if (!root) return 0;\n    struct TreeNode* q[10000];\n    int head = 0, tail = 0, depth = 1;\n    \n    q[tail++] = root;\n    while (head < tail) {\n        int size = tail - head; // Nodes in current level\n        for (int i = 0; i < size; i++) {\n            struct TreeNode* node = q[head++];\n            \n            if (!node->left && !node->right) return depth;\n            \n            if (node->left) q[tail++] = node->left;\n            if (node->right) q[tail++] = node->right;\n        }\n        depth++;\n    }\n    return depth;\n}`,
+      explanation: "We use an array queue to process the tree level by level. Because BFS searches outwards evenly, the VERY FIRST leaf node (a node with no left or right children) we encounter is strictly guaranteed to have the minimum depth.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Tree Form:</b> Root [3] -> Left: [9], Right: [20] -> Right's children: [15], [7]</div>
+  <div class="vis-desc"><b>Depth 1:</b> Enqueue Root (3).</div>
+  <div class="vis-array" style="gap:20px;">
+    <span>Queue State:</span>
+    <div class="vis-cell active">3</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Depth 2:</b> Pop 3. It's NOT a leaf (has children). Enqueue 9 and 20.</div>
+  <div class="vis-array" style="gap:20px;">
+    <span>Queue State:</span>
+    <div class="vis-cell">9</div><div class="vis-cell">20</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Check Depth 2:</b> Pop 9. It HAS NO CHILDREN! It is a leaf node! The moment we see this, BFS guarantees this is the shortest depth. We stop entirely.</div>
+  <div class="vis-array" style="gap:20px;">
+    <span>Processed:</span>
+    <div class="vis-cell target">9 (Found!)</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input tree: [3, 9, 20, null, null, 15, 7]</span>
+<span class="out-line">Start: Queue = [node(3)], depth = 1</span>
+<span class="out-line">Level entries: 1</span>
+<span class="out-line">  -> Pop node 3. Has left (9) and right (20). NOT a leaf.</span>
+<span class="out-line">  -> Push node 9. Push node 20. Queue = [node(9), node(20)]</span>
+<span class="out-line">Finished depth 1. Increment depth -> 2</span>
+<span class="out-line">Level entries: 2 (nodes 9, 20)</span>
+<span class="out-line">  -> Pop node 9. Left is null, right is null. <span class="out-bold">LEAF NODE DETECTED!</span></span>
+<span class="out-line">  -> Immediate return: depth 2.</span>
+<span class="out-bold">Final output: 2</span>`
+    }
+  },
+
+  { id:'dfs', name:'DFS / Backtracking', tag:'GRAPH', hint:'All paths, combinations, permutations, flood fill',
+    signals:['all combinations','all subsets','all permutations','generate all','find any path','flood fill'],
+    approach:'Recursion + undo. Build decisions one step at a time: Choose → Recurse → Unchoose. Mark visited to avoid cycles in graph DFS. The state space IS the recursion tree.',
+    template:`def backtrack(start, current):\n    if is_complete(current):\n        result.append(current[:])\n        return\n    for choice in get_choices(start):\n        current.append(choice)\n        backtrack(start + 1, current)\n        current.pop()  # undo`,
+    problems:['Subsets','Permutations','Combination sum','Word search (grid)','N-Queens'],
+    time:'O(2ⁿ) or O(n!)', space:'O(n) stack depth',
+    beginnerIntuition: 'Walking through a maze by keeping your hand on the right wall. You go as deep as possible until you hit a dead end, then you back up (backtrack) to the last intersection and try the next path.',
+    pitfalls: ['Forgetting to "undo" the choice (`pop()`) after the recursive call returns.', 'Appending the reference to `current` directly instead of a copy (`current[:]`), causing all answers to be overwritten.'],
+    exampleProblem: {
+      title: "LeetCode 200. Number of Islands",
+      desc: "Given an <code>m x n</code> 2D binary grid <code>grid</code> which represents a map of <code>'1'</code>s (land) and <code>'0'</code>s (water), return the number of islands.",
+      ccode: `void dfs(char** grid, int r, int c, int rSize, int cSize) {\n    if (r<0 || c<0 || r>=rSize || c>=cSize || grid[r][c]=='0') return;\n    grid[r][c] = '0'; // sink the land island to mark visited\n    \n    dfs(grid, r+1, c, rSize, cSize);\n    dfs(grid, r-1, c, rSize, cSize);\n    dfs(grid, r, c+1, rSize, cSize);\n    dfs(grid, r, c-1, rSize, cSize);\n}\n\nint numIslands(char** grid, int gridSize, int* gridColSize) {\n    int count = 0;\n    for (int i = 0; i < gridSize; i++) {\n        for (int j = 0; j < gridColSize[0]; j++) {\n            if (grid[i][j] == '1') {\n                count++;\n                dfs(grid, i, j, gridSize, gridColSize[0]);\n            }\n        }\n    }\n    return count;\n}`,
+      explanation: "Iterate across the grid. The instant we see a piece of unvisited land ('1'), we found a new island. We initiate DFS to recursively 'sink' the entire connecting island landmass into water ('0'). Once it returns, that entire island has been wiped off the map and counted.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Grid State initially:</b> We scan from top-left. Found a '1'!</div>
+  <div class="vis-array" style="display:grid;grid-template-columns:36px 36px 36px;gap:4px;">
+    <div class="vis-cell target">1</div><div class="vis-cell active">1</div><div class="vis-cell">0</div>
+    <div class="vis-cell active">1</div><div class="vis-cell active">1</div><div class="vis-cell">0</div>
+    <div class="vis-cell">0</div><div class="vis-cell">0</div><div class="vis-cell">0</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>DFS Sinking:</b> DFS recursively walks to all adjacent '1's. It changes them to '0' (water) so we don't count them again!</div>
+  <div class="vis-array" style="display:grid;grid-template-columns:36px 36px 36px;gap:4px;">
+    <div class="vis-cell warning">0</div><div class="vis-cell warning">0</div><div class="vis-cell">0</div>
+    <div class="vis-cell warning">0</div><div class="vis-cell warning">0</div><div class="vis-cell">0</div>
+    <div class="vis-cell">0</div><div class="vis-cell">0</div><div class="vis-cell">0</div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Result:</b> The island is fully submerged. Increment count to 1. The outer loop continues searching for un-sunk land.</div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Map: ["110","110","000"]</span>
+<span class="out-line">i=0, j=0: Cell is '1'! Island found. Count = 1. Launching DFS...</span>
+<span class="out-line">  -> DFS(0,0): Sunk to '0'. Recursion branches out...</span>
+<span class="out-line">  -> DFS(1,0): Sunk to '0'</span>
+<span class="out-line">  -> DFS(1,1): Sunk to '0'</span>
+<span class="out-line">  -> DFS(0,1): Sunk to '0'</span>
+<span class="out-line">  DFS returns completely (entire island cluster wiped out).</span>
+<span class="out-line">i=0, j=1: cell is '0' (Wait, it used to be '1', but we sunk it! So we skip).</span>
+<span class="out-line">... (All other cells are '0')</span>
+<span class="out-bold">Final output: Count 1</span>`
+    }
+  },
+
+  { id:'dp1', name:'1D Dynamic Programming', tag:'DP', hint:'Count/optimize with overlapping subproblems',
+    signals:['how many ways to','minimum cost to reach','count number of paths','can you reach the end','maximum profit'],
+    approach:'dp[i] = optimal answer for subproblem of size i. Find the recurrence by asking: what does dp[i] depend on? Fill bottom-up. If only need last 1–2 states → optimize to O(1) space.',
+    template:`dp = [0] * (n + 1)\ndp[0] = base_case\nfor i in range(1, n + 1):\n    dp[i] = recurrence(dp[i-1], dp[i-2], ...)`,
+    problems:['Climbing stairs','House robber','Coin change','Decode ways','Word break','Longest increasing subsequence'],
+    time:'O(n)', space:'O(n) → O(1) optimized',
+    beginnerIntuition: 'Like remembering answers to old math problems so you don\'t have to recalculate them. To know the best way to step 5, you just look up the best way to step 4 and step 3.',
+    pitfalls: ['Not identifying the correct base cases (e.g. `dp[0]` or `dp[1]`).', 'Trying to solve the whole problem at once instead of asking "If I knew the answer to the smaller version, how do I build the next step?"'],
+    exampleProblem: {
+      title: "LeetCode 70. Climbing Stairs",
+      desc: "You are climbing a staircase. It takes <code>n</code> steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+      ccode: `int climbStairs(int n) {\n    if (n <= 2) return n;\n    \n    int prev2 = 1; // ways to reach step 1\n    int prev1 = 2; // ways to reach step 2\n    int curr = 0;\n    \n    for (int i = 3; i <= n; i++) {\n        curr = prev1 + prev2;\n        prev2 = prev1;\n        prev1 = curr;\n    }\n    \n    return curr;\n}`,
+      explanation: "A classic Fibonacci sequence. To get to step N, you either came from step N-1 or step N-2. Thus, the total ways is just the sum of the ways to arrive at the previous two steps. We optimize space entirely down to O(1) by only holding variables for those two adjacent days.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Concept:</b> To get to Step 4, you could have jumped from Step 3 (1 step) OR jumped from Step 2 (2 steps). So Ways(4) = Ways(3) + Ways(2).</div>
+  <div class="vis-array" style="gap:10px; align-items:flex-end; height:80px; padding-top:20px;">
+    <div class="vis-cell" style="height:20px;">1</div>
+    <div class="vis-cell" style="height:40px;">2</div>
+    <div class="vis-cell target" style="height:60px;">+</div>
+    <div class="vis-cell active" style="height:80px;">3</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// target: n = 4</span>
+<span class="out-line">Init: prev2 = 1 (step 1), prev1 = 2 (step 2)</span>
+<span class="out-line">Loop i=3:</span>
+<span class="out-line">  curr = prev1(2) + prev2(1) = 3</span>
+<span class="out-line">  Shift history forward: prev2 becomes 2, prev1 becomes 3</span>
+<span class="out-line">Loop i=4:</span>
+<span class="out-line">  curr = prev1(3) + prev2(2) = 5</span>
+<span class="out-line">  Shift history forward: prev2 becomes 3, prev1 becomes 5</span>
+<span class="out-line">End of loop.</span>
+<span class="out-bold">Final output: curr = 5</span>`
+    }
+  },
+
+  { id:'dp2', name:'2D Dynamic Programming', tag:'DP', hint:'Two sequences, grid paths, knapsack',
+    signals:['two strings/sequences','grid minimum path','edit distance','longest common subsequence','0/1 knapsack','buy or skip each item'],
+    approach:'dp[i][j] = answer using first i of sequence A and first j of B. Fill row by row. Always draw the recurrence on paper first. Space-optimize by keeping only 1–2 rows.',
+    template:`m, n = len(A), len(B)\ndp = [[0] * (n+1) for _ in range(m+1)]\nfor i in range(1, m+1):\n    for j in range(1, n+1):\n        if A[i-1] == B[j-1]:\n            dp[i][j] = dp[i-1][j-1] + 1\n        else:\n            dp[i][j] = max(dp[i-1][j], dp[i][j-1])`,
+    problems:['Longest common subsequence','Edit distance','Unique paths','Coin change II','0/1 Knapsack'],
+    time:'O(m × n)', space:'O(m × n) → O(n)',
+    beginnerIntuition: 'A spreadsheet where each cell relies on the cells to its left and above. You are comparing two lists (like two strings) and filling out a table grid to match them up best.',
+    pitfalls: ['Index out of bounds due to mismatch between string index and DP table index (we often use size `n+1` for padding).', 'Getting overwhelmed—always draw the 2D grid on paper to see the pattern before writing code.'],
+    exampleProblem: {
+      title: "LeetCode 62. Unique Paths",
+      desc: "There is a robot on an <code>m x n</code> grid. It can only move down or right. Return the number of possible unique paths that the robot can take to reach the bottom-right corner.",
+      ccode: `int uniquePaths(int m, int n) {\n    int dp[105][105] = {0};\n    \n    for(int i=0; i<m; i++) {\n        for(int j=0; j<n; j++) {\n            if(i == 0 || j == 0) {\n                dp[i][j] = 1; \n            } else {\n                dp[i][j] = dp[i-1][j] + dp[i][j-1];\n            }\n        }\n    }\n    \n    return dp[m-1][n-1];\n}`,
+      explanation: "Build a grid table. The ways to reach any cell is exactly the sum of incoming paths from the cell above it plus the cell directly to its left. Notice the base case: filling out row 0 and column 0 are instantly '1 way' since you can only strictly travel right or strictly travel down.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Base cases:</b> Top edge & Left edge = 1 (Only 1 straight path to reach them). For interior cells, paths = Left + Up.</div>
+  <div class="vis-array" style="display:grid;grid-template-columns:36px 36px 36px;gap:4px;">
+    <div class="vis-cell warning">1</div><div class="vis-cell warning">1</div><div class="vis-cell warning">1</div>
+    <div class="vis-cell warning">1</div><div class="vis-cell active">2</div><div class="vis-cell active">3</div>
+    <div class="vis-cell warning">1</div><div class="vis-cell active">3</div><div class="vis-cell target">6</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: 3x3 Grid</span>
+<span class="out-line">Init Top Row (i=0): [1, 1, 1]</span>
+<span class="out-line">Init Left Col (j=0): [1, 1, 1]</span>
+<span class="out-line">Row 1 execution:</span>
+<span class="out-line">  dp[1][1] = dp[0][1](1) + dp[1][0](1) = <span class="out-bold">2</span></span>
+<span class="out-line">  dp[1][2] = dp[0][2](1) + dp[1][1](2) = <span class="out-bold">3</span></span>
+<span class="out-line">Row 2 execution:</span>
+<span class="out-line">  dp[2][1] = dp[1][1](2) + dp[2][0](1) = <span class="out-bold">3</span></span>
+<span class="out-line">  dp[2][2] = dp[1][2](3) + dp[2][1](3) = <span class="out-bold">6</span></span>
+<span class="out-bold">Final output: dp[2][2] = 6</span>`
+    }
+  },
+
+  { id:'heap', name:'Heap / Priority Queue', tag:'ARRAY', hint:'Kth element, top-k, merge sorted, stream median',
+    signals:['kth largest/smallest','top k frequent','merge k sorted','find median from stream','task scheduler'],
+    approach:'Min-heap for top-k largest (pop when size > k, heap[0] is answer). Max-heap for k smallest. Two heaps for running median. heap in Python is min-heap; negate values for max-heap.',
+    template:`import heapq\nheap = []\nfor num in nums:\n    heapq.heappush(heap, num)\n    if len(heap) > k:\n        heapq.heappop(heap)\n# heap[0] is the kth largest`,
+    problems:['K closest points to origin','Top K frequent elements','Merge k sorted lists','Find median from data stream','Task scheduler'],
+    time:'O(n log k)', space:'O(k)',
+    beginnerIntuition: 'Tending to a VIP club line. You only have space for `k` people. Whenever someone new comes who is cooler than the least cool person inside, you kick the least cool out and let the new one in.',
+    pitfalls: ['Using sorting O(n log n) instead of heap O(n log k) when k is small.', 'Confusing whether to use Min-Heap or Max-Heap. Rule of thumb: To find "Top K largest", use a Min-Heap of size K.'],
+    exampleProblem: {
+      title: "LeetCode 215. Kth Largest Element in an Array",
+      desc: "Given an integer array <code>nums</code> and an integer <code>k</code>, return the <code>k</code>th largest element in the array.",
+      ccode: `// Manual Max-Heap struct utilizing array indices \nvoid heapify(int* arr, int n, int i) {\n    int largest = i, left = 2*i+1, right = 2*i+2;\n    if (left < n && arr[left] > arr[largest]) largest = left;\n    if (right < n && arr[right] > arr[largest]) largest = right;\n    if (largest != i) {\n        // Swap root if child is bigger\n        int t = arr[i]; arr[i] = arr[largest]; arr[largest] = t;\n        heapify(arr, n, largest);\n    }\n}\n\nint findKthLargest(int* nums, int numsSize, int k) {\n    // Build the heap initially \n    for (int i = numsSize / 2 - 1; i >= 0; i--) {\n        heapify(nums, numsSize, i);\n    }\n    \n    // Pop K-1 times to reveal the Kth largest\n    for (int i = numsSize - 1; i >= numsSize - k + 1; i--) {\n        int temp = nums[0]; nums[0] = nums[i]; nums[i] = temp;\n        heapify(nums, i, 0);\n    }\n    return nums[0];\n}`,
+      explanation: "C has no built-in heap data structure, so you often implement a mini `heapify` function array simulation. Every parent is strictly bigger than its children. The array index 0 holds the max element. We swap it out and rebuild `k` times.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Approach: </b>With a max-heap, the biggest element is always magically floating at the [0] index. We extract the top and re-heapify exactly K-1 times to isolate the Kth biggest.</div>
+  <div class="vis-array">
+    <div class="vis-cell target">Max</div><div class="vis-cell">Left</div><div class="vis-cell">Right</div><div class="vis-cell">L-Child</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: [3,2,1,5,6,4], k = 2</span>
+<span class="out-line">1. Build Max Heap process... Array transforms into valid heap.</span>
+<span class="out-line">   Heap Array: [6, 5, 4, 2, 3, 1]</span>
+<span class="out-line">2. Root is currently 6. But we want 2nd largest. Pop 1 time!</span>
+<span class="out-line">   Swap 6 to end, push 1 to root. Heapify down.</span>
+<span class="out-line">   New Heap Array: [5, 3, 4, 2, 1, (6 discarded)]</span>
+<span class="out-line">3. K-1 pops completed. The K-th largest is now at the root!</span>
+<span class="out-bold">Final output: nums[0] = 5</span>`
+    }
+  },
+
+  { id:'hmap', name:'HashMap / HashSet', tag:'ARRAY', hint:'O(1) lookup, frequency count, complement search',
+    signals:['two sum','find duplicate','group anagrams','frequency count','complement exists','seen before'],
+    approach:'Trade O(n) space for O(1) lookup. Store what you\'ve seen, frequencies, or complement values. For complement search: store what you NEED (target - num), not what you have.',
+    template:`seen = {}\nfor i, num in enumerate(nums):\n    complement = target - num\n    if complement in seen:\n        return [seen[complement], i]\n    seen[num] = i`,
+    problems:['Two Sum','Group anagrams','Contains duplicate','Longest consecutive sequence','Subarray sum equals k'],
+    time:'O(n)', space:'O(n)',
+    beginnerIntuition: 'A magic file cabinet where looking up ANY folder takes exactly zero effort. As long as you know the label, you can grab it instantly.',
+    pitfalls: ['Keys must be immutable (like strings or tuples), you cannot use lists or dictionaries as keys.', 'Using an Array/List `in` check instead of a Set/Dict, turning an O(1) lookup into an O(n) disaster.'],
+    exampleProblem: {
+      title: "LeetCode 217. Contains Duplicate",
+      desc: "Given an integer array <code>nums</code>, return <code>true</code> if any value appears at least twice in the array.",
+      ccode: `typedef struct HashNode {\n    int val;\n    struct HashNode* next;\n} HashNode;\n\nbool containsDuplicate(int* nums, int numsSize) {\n    int hashSize = 10007; // Prime hash modulus\n    HashNode** table = calloc(hashSize, sizeof(HashNode*));\n    \n    for(int i=0; i<numsSize; i++) {\n        int idx = (nums[i] % hashSize + hashSize) % hashSize;\n        HashNode* curr = table[idx];\n        while(curr) {\n            if(curr->val == nums[i]) return true;\n            curr = curr->next;\n        }\n        \n        HashNode* newNode = malloc(sizeof(HashNode));\n        newNode->val = nums[i];\n        newNode->next = table[idx];\n        table[idx] = newNode;\n    }\n    return false;\n}`,
+      explanation: "Since C does not have a native HashMap library, you construct a minimal Chaining Table Hash. `idx` serves as our instantly-accessible magic drawer. If multiple things hash to the same drawer (collision), they share a tiny linked list.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>How a hash handles duplication checking:</b> As we visit numbers, we throw them into buckets based on a math formula. If a bucket already contains the number we try to throw in, we instantly know it's a duplicate!</div>
+  <div class="vis-array">
+    <div class="vis-cell" title="idx 1">...</div>
+    <div class="vis-cell active" title="idx: 21%10 = 1">21</div>
+    <div class="vis-cell warning" title="idx: 31%10 = 1">31</div>
+    <div class="vis-cell" title="idx 3">...</div>
+  </div>
+  <div class="vis-desc" style="font-size:12px;margin-top:4px;">(21 and 31 collide in bucket 1. They form a linked list. If another 21 arrives, looking inside bucket 1 immediately stops execution returning true!)</div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: [1, 2, 3, 1]</span>
+<span class="out-line">i=0, num=1. Hash(1). Bucket empty. Insert 1 into Hash.</span>
+<span class="out-line">i=1, num=2. Hash(2). Bucket empty. Insert 2 into Hash.</span>
+<span class="out-line">i=2, num=3. Hash(3). Bucket empty. Insert 3 into Hash.</span>
+<span class="out-line">i=3, num=1. Hash(1). Bucket contains 1! MATCH FOUND!</span>
+<span class="out-bold">Final output: true</span>`
+    }
+  },
+
+  { id:'tree', name:'Tree Traversal', tag:'TREE', hint:'In/pre/post-order, path sums, BST validation, LCA',
+    signals:['binary tree','BST property','root-to-leaf path','lowest common ancestor','serialize binary tree','diameter of tree'],
+    approach:'In-order → sorted output (BST). Pre-order → copy/serialize. Post-order → delete/aggregate children. Always ask: what do I need from children BEFORE processing parent vs AFTER?',
+    template:`def inorder(root):\n    if not root:\n        return\n    inorder(root.left)\n    process(root.val)   # ← in-order position\n    inorder(root.right)`,
+    problems:['Validate BST','Diameter of binary tree','Max path sum','Lowest common ancestor','Serialize/deserialize'],
+    time:'O(n)', space:'O(h) — O(log n) balanced',
+    beginnerIntuition: 'If the tree is a family structure, Pre-order is acting as the Parent first. Post-order is waiting for the Children to give you info before the Parent acts. In-order is perfect for sorted BSTs.',
+    pitfalls: ['Not catching the Empty Tree (`root == null`) base case.', 'Returning from recursive calls too early without visiting both left and right sides.'],
+    exampleProblem: {
+      title: "LeetCode 104. Maximum Depth of Binary Tree",
+      desc: "Given the root of a binary tree, return its maximum depth.",
+      ccode: `int maxDepth(struct TreeNode* root) {\n    if (root == NULL) {\n        return 0; // The depth at the empty bottom base case is 0 \n    }\n    \n    // Ask the left child for its depth\n    int leftDepth = maxDepth(root->left);\n    \n    // Ask the right child for its depth\n    int rightDepth = maxDepth(root->right);\n    \n    // The answer is simply the deepest side + 1 to account for yourself\n    if (leftDepth > rightDepth) {\n        return leftDepth + 1;\n    } else {\n        return rightDepth + 1;\n    }\n}`,
+      explanation: "Classic DFS recursion (Post-Order). You cannot know the maximum depth of a tree purely from the top. You must sequentially send reporters (recursions) down to the bottom and wait for them to return and report bounds back up.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Post-order accumulation:</b> Children must execute and return their depth values upwards before the parent can add +1 and return higher.</div>
+  <div style="font-family:var(--mono); color:var(--accent2); background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:13px; line-height:1.5;">
+     [Root]<br>
+      /    \\ <br>
+    [L]    [R]<br>
+     \\      \\ <br>
+    ret 1  ret 2
+  </div>
+  <div class="vis-desc" style="font-size:12px;margin-top:4px;">Left returns 1, Right returns 2. Root takes max(1, 2) + 1 = 3.</div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: [3, 9, 20, null, null, 15, 7]</span>
+<span class="out-line">maxDepth(3) starts.</span>
+<span class="out-line">  maxDepth(9) starts.</span>
+<span class="out-line">     maxDepth(null) returns 0</span>
+<span class="out-line">     maxDepth(null) returns 0</span>
+<span class="out-line">  maxDepth(9) resolves: max(0,0) + 1 = 1. Returns 1 to Root.</span>
+<span class="out-line">  maxDepth(20) starts.</span>
+<span class="out-line">     maxDepth(15) resolves identically to 1</span>
+<span class="out-line">     maxDepth(7) resolves identically to 1</span>
+<span class="out-line">  maxDepth(20) resolves: max(1,1) + 1 = 2. Returns 2 to Root.</span>
+<span class="out-line">maxDepth(3) resolves: max(1,2) + 1 = 3!</span>
+<span class="out-bold">Final output: 3</span>`
+    }
+  },
+
+{ id:'uf', name:'Union-Find (DSU)', tag:'GRAPH', hint:'Dynamic connectivity, connected components count',
+    signals:['number of connected components','dynamic edge insertion','accounts merge','friend groups','cycle in undirected graph'],
+    approach:'find() with path compression. union() by rank. Amortized O(α(n)) ≈ O(1) per operation. Ask: do I repeatedly need to check "are these two nodes connected?" → Union-Find wins over BFS/DFS.',
+    template:`parent = list(range(n))\nrank = [0] * n\ndef find(x):\n    if parent[x] != x:\n        parent[x] = find(parent[x])  # path compress\n    return parent[x]\ndef union(x, y):\n    px, py = find(x), find(y)\n    if rank[px] < rank[py]: px, py = py, px\n    parent[py] = px\n    if rank[px] == rank[py]: rank[px] += 1`,
+    problems:['Number of provinces','Redundant connection','Accounts merge','Most stones removed','Swim in rising water'],
+    time:'O(α(n)) per op', space:'O(n)',
+    beginnerIntuition: 'Forming clubs. Whenever two people meet, their clubs merge. To check if two people are in the same club, you just ask for the President of their clubs.',
+    pitfalls: ['Forgetting path compression in `find()`, slowing down operations drastically.', 'In `union()`, connecting `x` and `y` directly instead of connecting their roots `find(x)` and `find(y)`!'],
+    exampleProblem: {
+      title: "LeetCode 547. Number of Provinces",
+      desc: "There are n cities. Some of them are connected, while some are not. A province is a group of directly or indirectly connected cities. Return the total number of provinces.",
+      ccode: `int find(int* parent, int i) {\n    if (parent[i] == i) return i;\n    return parent[i] = find(parent, parent[i]); // Path compression optimization\n}\n\nint findCircleNum(int** isConnected, int isConnSize, int* isConnColSize) {\n    int* parent = malloc(isConnSize * sizeof(int));\n    for (int i = 0; i < isConnSize; i++) parent[i] = i;\n    \n    int provinces = isConnSize; // Start assuming everyone is disjoint\n    \n    for (int i = 0; i < isConnSize; i++) {\n        for (int j = i + 1; j < isConnSize; j++) {\n            if (isConnected[i][j]) {\n                int root1 = find(parent, i);\n                int root2 = find(parent, j);\n                if (root1 != root2) {\n                    parent[root1] = root2; // Perform union\n                    provinces--; // Two separate components just merged\n                }\n            }\n        }\n    }\n    return provinces;\n}`,
+      explanation: "Incredible array-simulation graph tracker. Whenever we detect connection via an adjacency matrix edge we execute <code>union()</code>. If a union resolves successfully, our total amount of divided independent islands shrinks by 1.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Initial State:</b> 3 cities, totally disconnected. <code>provinces = 3</code>. Let's say city 0 connects to city 1.</div>
+  <div class="vis-array" style="gap:20px;">
+    <div class="vis-cell" title="Parent 0">0<span class="vis-ptr top">Root</span></div>
+    <div class="vis-cell" title="Parent 1">1<span class="vis-ptr top">Root</span></div>
+    <div class="vis-cell" title="Parent 2">2<span class="vis-ptr top">Root</span></div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Union(0, 1):</b> The root of 1 now points to 0! They merged. The total <code>provinces</code> counter drops to 2.</div>
+  <div class="vis-array" style="gap:20px;">
+    <div class="vis-cell target" title="Parent 0">0<span class="vis-ptr top">Root</span></div>
+    <div class="vis-cell target" title="Points to 0">0<span class="vis-ptr top" style="color:var(--text)">Child(1)</span></div>
+    <div class="vis-cell" title="Parent 2">2<span class="vis-ptr top">Root</span></div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: [[1,1,0],[1,1,0],[0,0,1]] (Cities 0 and 1 connected)</span>
+<span class="out-line">Init: parent = [0, 1, 2], provinces = 3</span>
+<span class="out-line">i=0, j=1: isConnected is true!</span>
+<span class="out-line">  -> find(0) = 0</span>
+<span class="out-line">  -> find(1) = 1</span>
+<span class="out-line">  -> 0 != 1. Union them! parent[0] = 1. provinces drops to 2.</span>
+<span class="out-line">i=0, j=2: isConnected = false.</span>
+<span class="out-line">i=1, j=2: isConnected = false.</span>
+<span class="out-bold">Final output: provinces = 2</span>`
+    }
+  },
+
+  { id:'mono', name:'Monotonic Stack', tag:'ARRAY', hint:'Next greater/smaller, span, largest histogram',
+    signals:['next greater element','stock span','daily temperatures','largest rectangle histogram','trapping rain water','next warmer day'],
+    approach:'Maintain a stack of INDICES (not values) in monotonic order. When invariant breaks (new element violates order), pop and compute: the new element IS the answer for the popped element.',
+    template:`stack = []  # stores indices\nfor i in range(n):\n    while stack and arr[stack[-1]] < arr[i]:\n        idx = stack.pop()\n        # arr[i] is the next greater for arr[idx]\n        ans[idx] = arr[i]\n    stack.append(i)`,
+    problems:['Daily temperatures','Next greater element I & II','Largest rectangle in histogram','Trapping rain water','Sum of subarray minimums'],
+    time:'O(n)', space:'O(n)',
+    beginnerIntuition: 'People waiting in line. Only taller people can kick out shorter people in front of them. When a super tall person arrives, they kick out everyone shorter, and we realize "Ah, this tall person is the Next Greater Element".',
+    pitfalls: ['Storing the elements in the stack instead of their INDICES. You usually need distances, so indices are crucial.', 'Processing elements left-to-right vs right-to-left.'],
+    exampleProblem: {
+      title: "LeetCode 739. Daily Temperatures",
+      desc: "Given an array of integers <code>temperatures</code>, return an array such that <code>answer[i]</code> is the number of days you have to wait after the <code>ith</code> day to get a warmer temperature.",
+      ccode: `int* dailyTemperatures(int* temps, int tempsSize, int* returnSize) {\n    int* res = calloc(tempsSize, sizeof(int));\n    int* stack = malloc(tempsSize * sizeof(int));\n    int top = -1;\n    *returnSize = tempsSize;\n    \n    for (int i = 0; i < tempsSize; i++) {\n        // While stack isn't empty, and the incoming element is warmer\n        while (top >= 0 && temps[i] > temps[stack[top]]) {\n            int idx = stack[top--]; // Pop the index that was waiting\n            res[idx] = i - idx;     // Compute the span in days\n        }\n        // Incoming element goes into the stack queue waiting for its warmer day\n        stack[++top] = i; \n    }\n    \n    free(stack);\n    return res;\n}`,
+      explanation: "A strictly decreasing monotonic stack pattern. Every integer must wait passively in the stack. When a larger integer finally arrives, it acts as a bulldozer, clearing out smaller integers from the stack while resolving their waiting times cleanly in O(N).",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Input:</b> <code>[73, 74, 75, 71, 69, 72]</code><br>74 is bigger than 73. 74 "bulldozes" 73 out of the stack, setting its wait length. Then 75 bulldozes 74.</div>
+  <div class="vis-array" style="align-items:flex-end;height:60px;">
+    <div class="vis-cell" style="height:30px">75</div>
+    <div class="vis-cell" style="height:25px">71</div>
+    <div class="vis-cell" style="height:20px">69</div>
+  </div>
+  <div class="vis-desc" style="font-size:12px">Current stack holds monotonically decreasing temperatures: [75, 71, 69].</div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>The trigger step:</b> Then a <code>72</code> arrives! 72 > 69 (pop it!). 72 > 71 (pop it!). 72 isn't bigger than 75 (stop!).</div>
+  <div class="vis-array" style="align-items:flex-end;height:60px;">
+    <div class="vis-cell" style="height:30px">75</div>
+    <div class="vis-cell target" style="height:28px">72</div>
+  </div>
+  <div class="vis-desc" style="font-size:12px">Both 71 and 69 had their wait times instantly solved by the larger 72 arriving!</div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Temps: [73, 74, 75, 71, 69, 72]</span>
+<span class="out-line">i=0 (73): Stack empty. Push [idx 0].</span>
+<span class="out-line">i=1 (74): 74 > Stack[0](73). <span class="out-bold">POP 0!</span> res[0] = 1 - 0 = 1. Push [idx 1].</span>
+<span class="out-line">i=2 (75): 75 > Stack[1](74). <span class="out-bold">POP 1!</span> res[1] = 2 - 1 = 1. Push [idx 2].</span>
+<span class="out-line">i=3 (71): 71 < 75. Push [idx 3]. Stack=[2, 3]</span>
+<span class="out-line">i=4 (69): 69 < 71. Push [idx 4]. Stack=[2, 3, 4]</span>
+<span class="out-line">i=5 (72): 72 > Stack[4](69). <span class="out-bold">POP 4!</span> res[4] = 5 - 4 = 1.</span>
+<span class="out-line">          72 > Stack[3](71). <span class="out-bold">POP 3!</span> res[3] = 5 - 3 = 2.</span>
+<span class="out-line">          72 < 75. Stop. Push [idx 5]. Stack=[2, 5]</span>
+<span class="out-bold">Final output arrays: res = [1, 1, 0, 2, 1, 0]</span>`
+    }
+  },
+
+  { id:'trie', name:'Trie (Prefix Tree)', tag:'STRING', hint:'Prefix search, autocomplete, word dictionary',
+    signals:['prefix lookup','autocomplete','implement dictionary','count words with prefix','word search with wildcards','replace words'],
+    approach:'Each node = one character. isEnd flag marks complete words. O(L) per insert/search where L = word length. HashMap can\'t do prefix ops efficiently — Trie exists for exactly this.',
+    template:`class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.isEnd = False\n\nclass Trie:\n    def __init__(self):\n        self.root = TrieNode()\n    def insert(self, word):\n        cur = self.root\n        for ch in word:\n            cur = cur.children.setdefault(ch, TrieNode())\n        cur.isEnd = True`,
+    problems:['Implement Trie','Design add and search words','Word search II','Replace words','Prefix and suffix search'],
+    time:'O(L) per op', space:'O(N × L)',
+    beginnerIntuition: 'Like a folder system on a computer. You open folder "C", inside is folder "A", inside is folder "T", and inside is a file marking it as a word. Trees sharing common starting letters save massive space.',
+    pitfalls: ['Memory limits! Tries can use a lot of memory because of many child references.', 'Forgetting the `isEnd` marker, so the tree thinks any prefix is a full valid word.'],
+    exampleProblem: {
+      title: "LeetCode 208. Implement Trie (Prefix Tree)",
+      desc: "Implement a data structure designed to query if string prefixes successfully match anything in memory.",
+      ccode: `typedef struct Trie {\n    struct Trie* children[26];\n    bool isEndOfWord;\n} Trie;\n\nTrie* trieCreate() {\n    return calloc(1, sizeof(Trie)); // Calloc guarantees zero-init for children array\n}\n\nvoid trieInsert(Trie* obj, char* word) {\n    for (int i = 0; word[i]; i++) {\n        int idx = word[i] - 'a';\n        if (!obj->children[idx]) obj->children[idx] = trieCreate();\n        obj = obj->children[idx];\n    }\n    obj->isEndOfWord = true; // Mark finish terminal sequence\n}\n\nbool trieSearch(Trie* obj, char* word) {\n    for (int i = 0; word[i]; i++) {\n        int idx = word[i] - 'a';\n        if (!obj->children[idx]) return false;\n        obj = obj->children[idx];\n    }\n    return obj->isEndOfWord;\n}`,
+      explanation: "A massive, infinitely extending array pointer grid. Every single node holds 26 possible branches (slots for a-z representation). Notice how we walk exactly one path downward according to the character ascii index matching.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Insert "CAT" and "CAR":</b> They overlap seamlessly across their C and A nodes! Memory is perfectly optimized for shared prefixes.</div>
+  <div style="font-family:var(--mono); color:var(--text); background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:13px; line-height:1.5;">
+     [Root]<br>
+       |<br>
+      [C]<br>
+       |<br>
+      [A]<br>
+     /   \\ <br>
+  [T]*   [R]*    *(isEnd=true)
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Insert "cat"</span>
+<span class="out-line">Root -> 'c' (new) -> 'a' (new) -> 't' (new). Mark isEnd=true</span>
+<span class="out-comment">// Insert "car"</span>
+<span class="out-line">Root -> 'c' (exists!) -> 'a' (exists!) -> 'r' (new). Mark isEnd=true</span>
+<span class="out-comment">// Search "cap"</span>
+<span class="out-line">Root -> 'c' (exists) -> 'a' (exists) -> 'p' (NULL!). <span class="out-bold">Return false</span></span>
+<span class="out-comment">// Search prefix "ca"</span>
+<span class="out-line">Root -> 'c' (exists) -> 'a' (exists). Path exists. <span class="out-bold">Return true for valid prefix branch.</span></span>`
+    }
+  },
+
+  { id:'interval', name:'Intervals', tag:'ARRAY', hint:'Merge, insert, overlap detection, scheduling',
+    signals:['merge intervals','insert interval','meeting rooms','minimum number of platforms','non-overlapping intervals','activity selection'],
+    approach:'Sort by start time. Merge: if cur.start ≤ prev.end → extend prev.end to max of both. Meeting rooms: sort starts + ends separately, use two pointers or min-heap of end times.',
+    template:`intervals.sort(key=lambda x: x[0])\nmerged = [intervals[0]]\nfor start, end in intervals[1:]:\n    if start <= merged[-1][1]:\n        merged[-1][1] = max(merged[-1][1], end)\n    else:\n        merged.append([start, end])`,
+    problems:['Merge intervals','Insert interval','Meeting rooms II','Non-overlapping intervals','Employee free time'],
+    time:'O(n log n)', space:'O(n)',
+    beginnerIntuition: 'Drawing lines on a timeline. If physical lines overlap in time, you smudge them together into one longer continuous block.',
+    pitfalls: ['Trying to merge or process without sorting the array first.', 'When merging, mistakenly setting the new end to the second interval\'s end, rather than the `max()` of both ends.'],
+    exampleProblem: {
+      title: "LeetCode 56. Merge Intervals",
+      desc: "Given an array of <code>intervals</code> where <code>intervals[i] = [starti, endi]</code>, merge all overlapping intervals.",
+      ccode: `int cmp(const void* a, const void* b) {\n    return (*(int**)a)[0] - (*(int**)b)[0];\n}\n\nint** merge(int** intervals, int intervalsSize, int* intervalsColSize, int* retSize, int** retColSizes) {\n    qsort(intervals, intervalsSize, sizeof(int*), cmp);\n    int** res = malloc(intervalsSize * sizeof(int*));\n    int top = -1;\n    \n    for (int i = 0; i < intervalsSize; i++) {\n        // If array is empty, or interval starting slot is bigger than trailing edge\n        if (top == -1 || res[top][1] < intervals[i][0]) {\n            res[++top] = malloc(2 * sizeof(int));\n            res[top][0] = intervals[i][0];\n            res[top][1] = intervals[i][1];\n        } else {\n            // They overlap! Merge edges!\n            if (intervals[i][1] > res[top][1]) \n                res[top][1] = intervals[i][1];\n        }\n    }\n    *retSize = top + 1;\n    *retColSizes = malloc((*retSize) * sizeof(int));\n    for(int i = 0; i <= top; i++) (*retColSizes)[i] = 2;\n    return res;\n}`,
+      explanation: "Requires you to construct an anonymous struct <code>qsort</code> array comparison initially. Once sorted linearly out of order overlap scenarios vanish cleanly. Either creating a brand new interval instance, or aggressively dragging and extending an existing boundary rightward handles it.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Input:</b> <code>[[1,3], [2,6], [8,10]]</code><br>Since 2 (start of interval B) is less than or equal to 3 (end of interval A), we merge A and B by stretching the end to <code>max(3, 6) = 6</code>.</div>
+  <div class="vis-array" style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+    <div style="width:120px; height:12px; background:var(--bg4); border-radius:4px;"><div style="margin-left:10%; width:20%; height:100%; background:var(--blue); border-radius:4px;"></div></div>
+    <div style="width:120px; height:12px; background:var(--bg4); border-radius:4px;"><div style="margin-left:20%; width:40%; height:100%; background:var(--coral); border-radius:4px;"></div></div>
+    <div style="font-size:12px; margin-top:2px;">Overlap resolved: New combined block spans [1, 6]</div>
+    <div style="width:120px; height:12px; background:var(--bg4); border-radius:4px; margin-top:4px;"><div style="margin-left:10%; width:50%; height:100%; background:var(--purple); border-radius:4px;"></div></div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Given: [[1,3], [2,6], [8,10], [15,18]]</span>
+<span class="out-line">1. Sorting guarantees sequential starts: 1, 2, 8, 15</span>
+<span class="out-line">2. Setup Initial: push [1, 3] into result stack.</span>
+<span class="out-line">3. Next interval [2, 6]:</span>
+<span class="out-line">   -> 2 is <= StackTop end (3). OVERLAP!</span>
+<span class="out-line">   -> StackTop end updated to max(3, 6) = 6. Stack is now [[1, 6]]</span>
+<span class="out-line">4. Next interval [8, 10]:</span>
+<span class="out-line">   -> 8 is > StackTop end (6). Disconnected! Normal append.</span>
+<span class="out-line">   -> Stack is now [[1, 6], [8, 10]]</span>
+<span class="out-line">...</span>
+<span class="out-bold">Final output length 3: [[1,6],[8,10],[15,18]]</span>`
+    }
+  },
+
+  { id:'greedy', name:'Greedy', tag:'DP', hint:'Local optimal = global optimal (must be provable)',
+    signals:['minimum number of operations','can you always reach the end','jump game','gas station tour','maximize non-overlapping'],
+    approach:'At each step take the locally optimal choice. CRITICAL: greedy correctness requires proof (exchange argument). If you can\'t prove it → it\'s probably DP. Greedy ≠ "seems right at each step".',
+    template:`# Jump Game — classic greedy\nreach = 0\nfor i in range(len(nums)):\n    if i > reach:\n        return False  # can't proceed\n    reach = max(reach, i + nums[i])\nreturn True`,
+    problems:['Jump game','Gas station','Task scheduler','Candy','Partition labels','Non-overlapping intervals'],
+    time:'O(n)', space:'O(1)',
+    beginnerIntuition: 'A hungry person at a buffet who just takes the biggest slice of pie right in front of them without planning ahead. It only works if taking the biggest slice NOW never ruins a better choice LATER.',
+    pitfalls: ['Thinking Greedy will work for something that actually requires Dynamic Programming (like the 0/1 Knapsack problem). Greedy easily falls for local traps.'],
+    exampleProblem: {
+      title: "LeetCode 55. Jump Game",
+      desc: "You are given an integer array <code>nums</code>. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position. Return <code>true</code> if you can reach the last index.",
+      ccode: `bool canJump(int* nums, int numsSize) {\n    int maxReach = 0;\n    for (int i = 0; i < numsSize; i++) {\n        if (i > maxReach) return false; // Iteration walked into an untraversable zone!\n        \n        int reachScore = i + nums[i]; \n        if (reachScore > maxReach) {\n            maxReach = reachScore; \n        }\n    }\n    return true;\n}`,
+      explanation: "Classic purely greedy pattern matching track setup. If you're physically sitting at an index that your previously established Max boundaries couldn't even reach... execution stops securely.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>State check:</b> You are evaluating "What is the furthest I can physically reach from where I am right now?" We just strictly track that expanding boundary limit.</div>
+  <div class="vis-array">
+    <div class="vis-cell active" title="At idx 0, 2 jumps possible">2</div><div class="vis-cell active">3</div><div class="vis-cell warning">1<span class="vis-ptr top">Max Reach</span></div><div class="vis-cell">1</div><div class="vis-cell">4</div>
+  </div>
+  <div class="vis-desc" style="font-size:12px;margin-top:4px;">If the loop ever proceeds BEYOND the known Max Reach boundary, you instantly fail.</div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: nums = [2,3,1,1,4]</span>
+<span class="out-line">State starting limit: maxReach = 0</span>
+<span class="out-line">i=0: maxReach = max(0, 0 + nums[0]) = 2</span>
+<span class="out-line">i=1: maxReach = max(2, 1 + nums[1]) = 4 <span class="out-comment">(Can reach the end instantly from here!)</span></span>
+<span class="out-line">i=2: maxReach = max(4, 2 + nums[2]) = 4</span>
+<span class="out-line">i=3: maxReach = max(4, 3 + nums[3]) = 4</span>
+<span class="out-line">i=4: Loop finishes successfully without crashing.</span>
+<span class="out-bold">Final output: true</span>`
+    }
+  },
+
+  { id:'psum', name:'Prefix Sum', tag:'ARRAY', hint:'Fast subarray sum queries, range additions',
+    signals:['sum of subarray','queries for range sums','equilibrium index','subarray sum equals k','difference array'],
+    approach:'Precompute a running total list. The sum of any segment [i, j] is simply prefix[j] - prefix[i-1]. This turns O(N) range sum sweeps into O(1) instant lookups.',
+    template:`prefix = [0] * (len(nums) + 1)\nfor i in range(len(nums)):\n    prefix[i+1] = prefix[i] + nums[i]\n\n# Sum of nums[left : right+1]:\nans = prefix[right+1] - prefix[left]`,
+    problems:['Range sum query immutable','Subarray sum equals K','Find pivot index','Product of array except self','Contiguous array'],
+    time:'O(1) query, O(N) build', space:'O(N)',
+    beginnerIntuition: 'If you want to know how much distance you drove between mile marker 10 and mile marker 50, you just subtract them: 50 - 10 = 40. Prefix Sum computes all the "mile markers" ahead of time.',
+    pitfalls: ['Off-by-one errors. You usually need an extra zero at the beginning of the prefix array to represent the sum of "nothing".'],
+    exampleProblem: {
+      title: "LeetCode 303. Range Sum Query - Immutable",
+      desc: "Calculate the sum of the elements of <code>nums</code> between indices <code>left</code> and <code>right</code> inclusive.",
+      ccode: `typedef struct {\n    int* sums;\n} NumArray;\n\nNumArray* numArrayCreate(int* nums, int numsSize) {\n    NumArray* obj = malloc(sizeof(NumArray));\n    // Using numsSize + 1 prevents off by one array margin bounds checks \n    obj->sums = malloc((numsSize + 1) * sizeof(int));\n    obj->sums[0] = 0;\n    \n    for (int i = 0; i < numsSize; i++) {\n        obj->sums[i+1] = obj->sums[i] + nums[i];\n    }\n    return obj;\n}\n\nint numArraySumRange(NumArray* obj, int left, int right) {\n    return obj->sums[right + 1] - obj->sums[left];\n}`,
+      explanation: "By caching a rolling memory bank 1 array length extra thick we can efficiently request any internal range distance difference strictly within a lightning fast O(1) mathematical lookup context.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Original Array:</b> <code>[2, -1, 3, 1]</code></div>
+  <div class="vis-desc"><b>Prefix Sums Array:</b> <code>[0, 2, 1, 4, 5]</code></div>
+  <div class="vis-array" style="gap:20px;">
+    To get sum of items indices <code>0..2</code> (which is <code>2 + -1 + 3 = 4</code>): <br>
+    We request <code>prefix[3] - prefix[0]</code> <br>
+    Which is <code>4 - 0 = 4</code>. Instant!
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input array: [-2, 0, 3, -5, 2, -1]</span>
+<span class="out-line">Init Prefix array: length 7. First element = 0</span>
+<span class="out-line">Building: prefix[1] = 0 + -2 = -2</span>
+<span class="out-line">Building: prefix[2] = -2 + 0 = -2</span>
+<span class="out-line">Building: prefix[3] = -2 + 3 = 1</span>
+<span class="out-line">Building: prefix[4] = 1 + -5 = -4</span>
+<span class="out-line">Building: prefix[... and so on...]</span>
+<span class="out-comment">// Query format: Query(0, 2)</span>
+<span class="out-line">return prefix[3] - prefix[0] => 1 - 0 = <span class="out-bold">1</span></span>
+<span class="out-comment">// Query format: Query(2, 5)</span>
+<span class="out-line">return prefix[6] - prefix[2] => -3 - (-2) = <span class="out-bold">-1</span></span>`
+    }
+  },
+
+  { id:'fsp', name:'Fast & Slow Pointers', tag:'LIST', hint:'Cycle detection, middle of list, cycle start',
+    signals:['linked list cycle','find the middle','find the duplicate number','happy number','cycle starting node'],
+    approach:'A slow pointing moving 1 step, a fast pointing moving 2 steps. If there is a cycle, they will mathematically collide. Distance tricks then allow you to find the exact start of the cycle.',
+    template:`slow = fast = head\nwhile fast and fast.next:\n    slow = slow.next\n    fast = fast.next.next\n    if slow == fast:\n        return True  # Cycle detected!`,
+    problems:['Linked list cycle I & II','Middle of the linked list','Palindrome linked list','Find the duplicate number','Happy number'],
+    time:'O(N)', space:'O(1)',
+    beginnerIntuition: 'Two runners on a track. One runs twice as fast. If the track is a straight line, the fast runner wins. If it is a circle, the fast runner will eventually lap and crash into the slow runner.',
+    pitfalls: ['Failing to check if `fast` or `fast.next` is null before advancing two steps, causing Null Pointer Exceptions.'],
+    exampleProblem: {
+      title: "LeetCode 141. Linked List Cycle",
+      desc: "Given <code>head</code>, the head of a linked list, determine if the linked list has a cycle in it.",
+      ccode: `bool hasCycle(struct ListNode *head) {\n    struct ListNode *slow = head;\n    struct ListNode *fast = head;\n    \n    while (fast != NULL && fast->next != NULL) {\n        slow = slow->next;        // Moves 1x speed\n        fast = fast->next->next;  // Moves 2x speed\n        \n        if (slow == fast) {\n            return true; // Fast runner lapped the slow runner!\n        }\n    }\n    return false; // Fast reached the terminus safely \n}`,
+      explanation: "A strictly O(1) space tortoise and hare implementation. This elegantly removes the need for HashSets when purely requesting abstract boolean existence checks on massive graph cycle problems.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Cycle Detected:</b> <code>1 -> 2 -> 3 -> 4 -> (points back to 2)</code></div>
+  <div class="vis-array" style="gap:20px;">
+    Step 1: Slow at [1], Fast at [1].<br>
+    Step 2: Slow hits [2], Fast laps forward instantly to [3]!<br>
+    Step 3: Slow hits [3], Fast jumps [4->2] hitting [2]!<br>
+    Step 4: Slow hits [4], Fast jumps [3->4] hitting [4]! <br>
+    <b>COLLISION! They both land on [4] simultaneously!</b>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input List: [3, 2, 0, -4] -> cycle to index 1 (val 2)</span>
+<span class="out-line">Init: slow=head(3), fast=head(3).</span>
+<span class="out-line">Loop 1: slow drops 1 step to (2). fast drops 2 steps to (0). slow != fast.</span>
+<span class="out-line">Loop 2: slow drops 1 step to (0). fast drops 2 steps to (2) [wrapped]. slow != fast.</span>
+<span class="out-line">Loop 3: slow drops 1 step to (-4). fast drops 2 steps to (-4) [wrapped].</span>
+<span class="out-line">slow == fast! Condition met! Cycle confirmed mathematically!</span>
+<span class="out-bold">Final output: true</span>`
+    }
+  },
+
+  { id:'topsort', name:'Topological Sort', tag:'GRAPH', hint:'Dependency resolution, prerequisite ordering',
+    signals:['prerequisites','schedule tasks','course schedule','compile dependencies','alien dictionary'],
+    approach:'Count incoming arrows (in-degrees) for every node. Nodes with zero incoming arrows have no prerequisites, process them first. As you process, "delete" their outgoing arrows. Repeat.',
+    template:`from collections import deque\nin_degree = {n: 0 for n in nodes}\n# build graph and in_degrees...\nq = deque([n for n in nodes if in_degree[n] == 0])\norder = []\nwhile q:\n    curr = q.popleft()\n    order.append(curr)\n    for nei in adj[curr]:\n        in_degree[nei] -= 1\n        if in_degree[nei] == 0:\n            q.append(nei)`,
+    problems:['Course schedule I & II','Alien dictionary','Sort items by groups respecting dependencies','Course schedule IV'],
+    time:'O(V + E)', space:'O(V + E)',
+    beginnerIntuition: 'Dressing yourself. You must put on socks before shoes. Count how many items must precede each garment. Socks have 0 prerequisites, put those first.',
+    pitfalls: ['Not checking if the final sorted order includes ALL nodes. If it doesn\'t, it means there is a circular dependency / impossible cycle.'],
+    exampleProblem: {
+      title: "LeetCode 207. Course Schedule",
+      desc: "Return <code>true</code> if you can finish all courses. Otherwise, return <code>false</code>. They rely upon an array of independent arrays signifying required node dependencies.",
+      ccode: `bool canFinish(int numC, int** pre, int preSize, int* colSize) {\n    int* inDegree = calloc(numC, sizeof(int));\n    // Establish dependency lock counts\n    for(int i = 0; i < preSize; i++) inDegree[pre[i][0]]++;\n    \n    int* q = malloc(numC * sizeof(int));\n    int head = 0, tail = 0;\n    // Queue inherently free nodes (0 dependencies)\n    for(int i = 0; i < numC; i++) {\n        if (inDegree[i] == 0) q[tail++] = i;\n    }\n    \n    int processed = 0;\n    while(head < tail) {\n        int curr = q[head++];\n        processed++;\n        // Walk outward connections destroying dependency locks\n        for(int i = 0; i < preSize; i++) {\n            if (pre[i][1] == curr) {\n                inDegree[pre[i][0]]--;\n                if (inDegree[pre[i][0]] == 0) q[tail++] = pre[i][0];\n            }\n        }\n    }\n    return processed == numC;\n}`,
+      explanation: "Kahn's algorithm using an inductive BFS queue matrix layout structure. If the <code>processed</code> counter finishes smaller than strict element length counts, you definitively contain an impossible looping dependency circle structure.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Dependency Graph:</b> Course 0 requires Course 1. Wait, let's reverse it visually: Course 1 unlocks Course 0. So 1 -> 0. Course 1 has an In-Degree of 0. Course 0 has an In-Degree of 1.</div>
+  <div class="vis-array" style="gap:20px;">
+    <div class="vis-cell target" title="0 prereqs">1<span class="vis-ptr top">Queue</span></div> 
+    <span style="display:flex;align-items:center;">▶</span>
+    <div class="vis-cell warning" title="1 prereqs">0<span class="vis-ptr top" style="color:var(--text)">Locked</span></div>
+  </div>
+</div>
+<div class="vis-frame">
+  <div class="vis-desc"><b>Processing:</b> We pop 1 from Queue. It is complete. We search for connections it unlocked. Course 0 drops a lock. Its In-Degree falls to 0! Add to queue!</div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: numCourses = 2, prerequisites = [[1,0]] (Need 0 to take 1)</span>
+<span class="out-line">Init inDegree arrays: Course 0 has 0 locks. Course 1 has 1 lock.</span>
+<span class="out-line">Initial Queue scan: Course 0 has 0 locks. Adding Course 0 to execution queue.</span>
+<span class="out-line">Queue state: [0]</span>
+<span class="out-line">Pop Course 0. Processed = 1.</span>
+<span class="out-line">  -> Scanning out connections... found connection pointing to Course 1!</span>
+<span class="out-line">  -> Dropping Course 1 'inDegree' lock to 0.</span>
+<span class="out-line">  -> Course 1 is unlocked! Adding to queue. Queue = [1]</span>
+<span class="out-line">Pop Course 1. Processed = 2. No more out connections.</span>
+<span class="out-line">Total processed (2) == numCourses (2) -> All courses traversable without circular trap!</span>
+<span class="out-bold">Final output: true</span>`
+    }
+  },
+
+  { id:'revll', name:'In-place Reversal', tag:'LIST', hint:'Reverse a linked list by changing pointers',
+    signals:['reverse linked list','reverse nodes in k-group','reverse given sublist','palindrome linked list'],
+    approach:'Keep track of `prev`, `curr`, and `next`. While traversing, grab `next`, point `curr.next` backward to `prev`, then shift both `prev` and `curr` forward. Do not allocate new nodes.',
+    template:`prev = None\ncurr = head\nwhile curr:\n    nxt = curr.next\n    curr.next = prev\n    prev = curr\n    curr = nxt\nreturn prev`,
+    problems:['Reverse linked list I & II','Reverse nodes in k-Group','Swap nodes in pairs','Rotate list'],
+    time:'O(N)', space:'O(1)',
+    beginnerIntuition: 'You have a line of people holding hands forward. Starting from the front, you tell each person to let go, turn around, and hold the hand of the person behind them instead.',
+    pitfalls: ['Losing the reference to the rest of the list because you changed the pointer before saving the "next" node.'],
+    exampleProblem: {
+      title: "LeetCode 206. Reverse Linked List",
+      desc: "Given the <code>head</code> of a singly linked list, reverse the list, and return the reversed list without allocating a new structure.",
+      ccode: `struct ListNode* reverseList(struct ListNode* head) {\n    struct ListNode *prev = NULL;\n    struct ListNode *curr = head;\n    struct ListNode *nextTemp = NULL;\n    \n    while (curr != NULL) {\n        nextTemp = curr->next;  // Remember the future\n        curr->next = prev;      // Reverse the present pointer\n        prev = curr;            // Advance the trail frame\n        curr = nextTemp;        // Advance the present frame\n    }\n    \n    return prev; // Prev always finishes squarely on the final node root\n}`,
+      explanation: "By securely storing the required future sequence element (<code>nextTemp</code>) first we can safely detach structural pointers in completely self isolated iteration steps.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Original:</b> <code>1 -> 2 -> 3 -> NULL</code></div>
+  <div class="vis-desc"><b>Iteration 1:</b> Current = 1. NextTemp saves 2. Pointer rewires: 1 points backward to NULL. Prev shifts onto 1. Curr jumps onto 2.</div>
+  <div class="vis-array" style="gap:20px;">
+    <div class="vis-cell" title="Prev">N<span class="vis-ptr top">Prev</span></div>
+    <span style="display:flex;align-items:center;">◀</span>
+    <div class="vis-cell active" title="Curr">1<span class="vis-ptr top">Curr</span></div>
+    <div class="vis-cell" title="NextTemp">2<span class="vis-ptr top">Next</span></div>
+    <span style="display:flex;align-items:center;">▶</span>
+    <div class="vis-cell">3</div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input list: 1 -> 2 -> 3</span>
+<span class="out-line">Start: prev=null, curr=Node(1)</span>
+<span class="out-line">Loop pass 1:</span>
+<span class="out-line">  nextTemp receives Node(2)</span>
+<span class="out-line">  Node(1)->next redirected to prev (null)</span>
+<span class="out-line">  prev jumps to Node(1)</span>
+<span class="out-line">  curr jumps to nextTemp (Node 2)</span>
+<span class="out-line">Loop pass 2:</span>
+<span class="out-line">  nextTemp receives Node(3)</span>
+<span class="out-line">  Node(2)->next redirected to prev (Node 1). <span class="out-comment">Chain is now: 2 -> 1 -> null</span></span>
+<span class="out-line">  prev jumps to Node(2)</span>
+<span class="out-line">  curr jumps to nextTemp (Node 3)</span>
+<span class="out-line">Loop pass 3 completes returning prev node containing completely reversed chain structure.</span>
+<span class="out-bold">Final output: Node(3) [3 -> 2 -> 1 -> null]</span>`
+    }
+  },
+
+  { id:'bit', name:'Bit Manipulation', tag:'BIT', hint:'XOR logic, powers of two, bitwise masks',
+    signals:['find the missing number','single number appearing once','power of two','number of 1 bits','bitwise XOR'],
+    approach:'Exploit binary representation. Key facts: n ^ n = 0 (XOR cancels duplicates). n & (n - 1) strips the lowest set bit. Bitwise shifts multiply/divide by 2.',
+    template:`# Find single number (all others appear twice)\nres = 0\nfor num in nums:\n    res ^= num\nreturn res`,
+    problems:['Single number','Missing number','Number of 1 bits','Reverse bits','Counting bits','Sum of two integers'],
+    time:'O(N)', space:'O(1)',
+    beginnerIntuition: 'Toggling light switches. XOR specifically is like a flip switch. If you flip it twice, it goes back to exactly what it was (duplicates cancel out entirely to 0).',
+    pitfalls: ['Operator precedence issues in languages like C++ (always wrap bitwise operations in parentheses).', 'Sign extension behaving unexpectedly on negative numbers in languages like Java (>>> vs >>).'],
+    exampleProblem: {
+      title: "LeetCode 136. Single Number",
+      desc: "Given a non-empty array of integers <code>nums</code>, every element appears twice except for one. Find that single one.",
+      ccode: `int singleNumber(int* nums, int numsSize) {\n    int single = 0;\n    for (int i = 0; i < numsSize; i++) {\n        single ^= nums[i]; // Bitwise XOR directly upon accumulator  \n    }\n    return single;\n}`,
+      explanation: "A bitwise XOR operator (<code>^</code>) guarantees numbers executed twice simply cancel out purely algebraically internally into `0` bytes seamlessly leaving isolated targets exposed directly.",
+      visualization: `
+<div class="vis-frame">
+  <div class="vis-desc"><b>Input:</b> <code>[4, 1, 2, 1, 2]</code><br>XOR (^) operates on binary bits. Same bits = 0. Different bits = 1.</div>
+  <div class="vis-array" style="display:flex; flex-direction:column; gap:8px;">
+    <div style="font-family:var(--mono); color:var(--accent2); background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:14px; line-height:1.6;">
+Initial : 000 (0)<br>
+XOR 4   : 100 (4)<br>
+XOR 1   : 101 (5)<br>
+XOR 2   : 111 (7)<br>
+XOR 1   : 110 (6)  <span style="font-size:12px; color:var(--text3)">(Wait, the 1 bit toggled off! It cancelled out the previous 1.)</span><br>
+XOR 2   : 100 (4)  <span style="font-size:12px; color:var(--text3)">(The 2 toggled off! Cancelled out!)</span><br>
+Final   : 100 (4 - The only one left turned on.)
+    </div>
+  </div>
+</div>
+`,
+      codeOutput: `<span class="out-comment">// Input: [2, 1, 2]</span>
+<span class="out-line">Init value = 0</span>
+<span class="out-line">i=0, num=2: 0 XOR 2 = 2. Accumulator is 2.</span>
+<span class="out-line">i=1, num=1: 2 XOR 1 = 3. Accumulator is 3.</span>
+<span class="out-line">i=2, num=2: 3 XOR 2 = 1. Accumulator is 1.</span>
+<span class="out-line">Loop completes!</span>
+<span class="out-bold">Final output: 1</span>`
+    }
+  }
+];
+
+const reconcileSteps = [
+  { num:'R1', color:'sn-purple', name:'Restate in your own words', desc:'Spend 60 seconds rephrasing the problem without looking at it. If you can\'t, you haven\'t understood it. This forces you to extract the core structure from the story wrapper.',
+    checks:['What is the input? What is the output?', 'What are the key constraints? (sorted? unique? positive? cyclic?)', 'What changes? What stays fixed?'] },
+  { num:'R2', color:'sn-green', name:'Match the shape, not the story', desc:'"Two Sum" and "Find pair with target sum" and "Complement lookup" are the same shape — HashMap O(n). Strip the narrative, see the data structure type + operation type.',
+    checks:['Array + subarray optimization → Sliding Window / Prefix Sum', 'Tree/graph + visit everything → BFS / DFS', 'Optimization with overlapping subproblems → DP', 'Sorted input + search → Binary Search / Two Pointers', 'k-th element / stream → Heap'] },
+  { num:'R3', color:'sn-blue', name:'Justify the pattern choice out loud', desc:'Say it: "I\'m using sliding window because the problem asks for a contiguous subarray where each window differs from the last by exactly one element. Sliding window gives O(n) vs O(nk) brute force." If you can\'t justify it, you\'re guessing.',
+    checks:['What property does this pattern exploit?', 'Why does brute force fail here? (Too slow? Too much memory?)', 'What invariant is maintained throughout execution?'] },
+  { num:'R4', color:'sn-amber', name:'Write the template skeleton first', desc:'Before any problem-specific logic, write the structural skeleton from memory. Sliding window? Write left=0, the loop, the shrink condition. BFS? Write deque, visited. DP? Write the dp array + base case. Template first, problem specifics second.',
+    checks:['Template skeleton → then problem-specific logic', 'Name variables after the domain, not the template', 'Add one comment per major block explaining its role'] },
+];
+
+const recallSteps = [
+  { num:'01', title:'Feynman it after every solve', desc:'After solving any problem, close the editor. Write in plain English: "This was a [pattern] problem. I used [approach] because [invariant]. The key insight was [aha]. Next time I\'ll recognize it when I see [signal]." This builds explicit memory traces, not implicit "I\'ve seen this" feelings.', pills:[] },
+  { num:'02', title:'Weekly blank-page template drill', desc:'Every Sunday: open a blank file. Write all 15 core pattern templates from memory. Don\'t look anything up. Time yourself. The ones you blank on are your weak spots for that week. This is painful. That\'s exactly why it works.',
+    pills:['Sliding window (fixed + variable)', 'Two pointers (same dir + opposite)', 'BFS + DFS (iterative + recursive)', 'Binary search (lo/hi variants)', 'Heap push/pop', 'DP 1D + 2D base cases', 'Union-Find with path compression'] },
+  { num:'03', title:'One pattern per week — depth first', desc:'Don\'t solve randomly. Pick one pattern per week. Do 5–8 problems from that pattern in ascending difficulty. Then do 2–3 "mixed" problems where you have to identify the pattern yourself. Week 1: Sliding Window. Week 2: Two Pointers. Week 3: BFS/DFS. Depth before breadth.', pills:[] },
+  { num:'04', title:'Pattern journal — one card per problem', desc:'Maintain a card per problem: Problem → Pattern → Why this pattern → Edge cases → Time/Space. Review 10 cards before sleep. Your brain consolidates during sleep. After 30 days you have a searchable mental index.', pills:[] },
+  { num:'05', title:'Spaced repetition on failures', desc:'Tag every problem you got wrong or took >30 min. Re-attempt tagged problems at 1 day, 3 day, 7 day, and 14 day intervals. Don\'t chase new problems when you have unreviewed failures — that is the single biggest efficiency mistake in DSA prep.', pills:[] },
+];
+
+const drillQuestions = [
+  { q:"Find the maximum sum of any contiguous subarray of size exactly k.", ans:0, choices:['Sliding Window','Two Pointers','Dynamic Programming','Binary Search'], why:"Fixed-size window — each step adds one element on the right, removes one from the left. Classic fixed sliding window pattern. O(n) vs O(nk) brute force." },
+  { q:"Given a sorted array, find if there exists a pair of elements that sum to a target value.", ans:1, choices:['HashMap O(n)','Two Pointers','Sliding Window','BFS'], why:"Sorted array + pair sum = two pointers. Move lo right when sum too small, hi left when too big. O(n) with O(1) space — better than HashMap for sorted arrays." },
+  { q:"Find the minimum number of steps to reach from (0,0) to (n-1,n-1) in a grid with obstacles (0s are passable).", ans:2, choices:['DFS','Dynamic Programming','BFS','Greedy'], why:"Minimum steps = BFS. BFS guarantees the first time you reach any cell, it's via the shortest path. DFS doesn't give you this guarantee — it may find a path but not the shortest one." },
+  { q:"Given a list of words, group all anagrams together into sublists.", ans:3, choices:['Sorting only','Trie','DFS Backtracking','HashMap with sorted key'], why:"Sort each word → it becomes a canonical key (all anagrams share the same sorted key). Group by that key in a HashMap. O(n × L log L)." },
+  { q:"Return all subsets of a given array of distinct integers.", ans:1, choices:['Dynamic Programming','DFS Backtracking','Sliding Window','Monotonic Stack'], why:"All subsets = explore all 2ⁿ possibilities = backtracking. At each element, decide include or exclude. Build the decision tree recursively." },
+  { q:"You have a list of intervals. Merge all overlapping ones and return the result.", ans:2, choices:['Two Pointers','Binary Search','Sort + Merge Intervals','Heap'], why:"Sort by start time. Walk through — if current start ≤ previous end, extend the merged interval. Classic greedy interval merge. O(n log n) due to sorting." },
+  { q:"Find the kth largest element in a stream of integers arriving one at a time.", ans:0, choices:['Min-heap of size k','Max-heap','Sorting per insert','Binary Search on sorted list'], why:"Min-heap of size k. The heap root is always the kth largest seen so far. When size exceeds k, pop the minimum. O(n log k) total vs O(n²) naive." },
+  { q:"Given two strings, find the length of their Longest Common Subsequence.", ans:3, choices:['1D DP','Greedy','Two Pointers','2D DP table'], why:"Two sequences + character-by-character comparison + optimal substructure = 2D DP. dp[i][j] = LCS of first i chars of s1 and first j chars of s2. Classic 2D DP setup." },
+  { q:"Track connected components in an undirected graph as edges are dynamically added one by one.", ans:2, choices:['BFS after each edge','DFS after each edge','Union-Find','Topological Sort'], why:"Dynamic connectivity queries = Union-Find. BFS/DFS work but require full traversal O(V+E) after each insertion. UF gives O(α(n)) ≈ O(1) per union/find." },
+  { q:"Find the next greater element for each element in an array (to its right). Return -1 if none exists.", ans:3, choices:['Two Pointers','Brute Force O(n²)','Binary Search','Monotonic Stack'], why:"'Next greater' = decreasing monotonic stack. When you see a larger element, it IS the next greater for everything on the stack smaller than it. Pop and record. O(n)." },
+  { q:"Implement a data structure that supports inserting words and searching for words with wildcard characters '.'.", ans:1, choices:['HashMap','Trie with DFS','Sorted array + binary search','Regular expressions'], why:"Prefix-based dictionary ops = Trie. Wildcard '.' handled by branching into all children at that node (DFS). HashMap can't do this efficiently." },
+  { q:"Find if target exists in a rotated sorted array (e.g., [4,5,6,7,0,1,2], target=0).", ans:1, choices:['Linear scan O(n)','Binary Search with rotation check','Two Pointers','Divide and Conquer'], why:"Rotated sorted array — one half is always fully sorted. Binary search: check which half is sorted, determine if target lies within it, then recurse into the correct half. O(log n)." },
+  { q:"Find the sum of elements between indices [L, R] in an array efficiently for multiple queries.", ans:3, choices:['Two Pointers','Sliding Window','Binary Search','Prefix Sum'], why:"Repeated range sums = Prefix Sum. We precompute running totals so every query becomes a simple subtraction O(1)." },
+  { q:"Determine the order in which to compile packages given their dependencies.", ans:0, choices:['Topological Sort','Union-Find','DFS Flood Fill','Trie'], why:"Dependencies/prerequisites mapping to an order = Topological sort. Process nodes with zero incoming dependency edges entirely first." },
+  { q:"Reverse pairs of nodes (e.g., 1->2->3->4 becomes 2->1->4->3) in a linked list without using extra space.", ans:2, choices:['Two Pointers','Stack','In-place Reversal','Fast & Slow Pointers'], why:"Changing structural order without allocating new nodes = In-place Reversal. Meticulous pointer rewiring (prev, curr, next)." },
+  { q:"Find the single number that does not appear twice in an array where every other element appears twice.", ans:1, choices:['HashMap','Bit Manipulation','Sorting','Two Pointers'], why:"While HashMap works, Bit Manipulation (XOR ^) is O(N) time and O(1) space. Duplicates XOR out to 0, leaving only the single number." },
+  { q:"Find the starting node of a cycle in a linked list.", ans:3, choices:['DFS','Binary Search','HashMap','Fast & Slow Pointers'], why:"Cycle in a list = Fast & Slow pointers. First they meet to prove a cycle exists, then use distance math to find the exact entry point." },
+];
+
+const glossaryTerms = [
+  { term: "Invariant", def: "A rule that must ALWAYS remain true throughout your loop. In Sliding Window, the invariant might be 'window sum is <= k'." },
+  { term: "Monotonic", def: "Always increasing or always decreasing. A monotonic stack means the numbers inside never go up and down randomly; they strictly go in one direction." },
+  { term: "Subarray / Substring", def: "A continuous chunk of an array or string. You can't skip elements. Example: 'cat' is a substring of 'scatter'." },
+  { term: "Subsequence", def: "A part of a sequence that keeps the original order but allows skipping elements. Example: 'ace' is a subsequence of 'abcde'." },
+  { term: "State Space", def: "Every possible valid decision you could make represented as a 'board state'. Used heavily in BFS/DFS (like generating permutations)." },
+  { term: "Amortized O(1)", def: "Usually it's instant O(1), but very rarely it might take longer. Over many operations, it averages out to O(1). Like resizing a dynamic array." },
+  { term: "Heuristic", def: "A rule of thumb or an estimated guess that practically speeds up an algorithm, even if it's not perfect." },
+  { term: "In-place", def: "Modifying the original input structure directly without creating a new copy. Usually implies O(1) extra space." },
+];
+
+function renderGlossary() {
+  document.getElementById('glossary-grid').innerHTML = glossaryTerms.map(g => `
+    <div class="glossary-card">
+      <div class="glossary-term">${g.term}</div>
+      <div class="glossary-def">${g.def}</div>
+    </div>`).join('');
+}
+
+// ─── RENDER PATTERNS ───
+function renderPatterns() {
+  const grid = document.getElementById('pattern-grid');
+  grid.innerHTML = patterns.map(p => `
+    <div class="pcard" id="pcard-${p.id}" onclick="showDetail('${p.id}')">
+      <span class="pcard-tag tag-${p.tag}">${p.tag}</span>
+      <div class="pcard-name">${p.name}</div>
+      <div class="pcard-hint">${p.hint}</div>
+    </div>`).join('');
+}
+
+function showDetail(id) {
+  const p = patterns.find(x => x.id === id);
+  document.querySelectorAll('.pcard').forEach(c => c.classList.remove('active'));
+  document.getElementById('pcard-' + id).classList.add('active');
+
+  const panel = document.getElementById('detail-panel');
+  panel.innerHTML = `
+    <div class="detail-head">
+      <span class="pcard-tag tag-${p.tag}">${p.tag}</span>
+      <div class="detail-name">${p.name}</div>
+      <div style="margin-left:auto;display:flex;gap:10px">
+        <span class="cx-badge">${p.time}</span>
+        <span class="cx-badge" style="color:var(--green)">${p.space}</span>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-block" style="grid-column: 1 / -1; padding: 18px; background: rgba(124,109,250,0.06); border-radius: 12px; border: 1px solid var(--border);">
+        <div class="detail-label" style="color: var(--accent2);">💡 Beginner Intuition (ELI5)</div>
+        <div class="detail-val" style="color: var(--text);">${p.beginnerIntuition}</div>
+      </div>
+      <div class="detail-block">
+        <div class="detail-label">Recognize when you see</div>
+        <div class="signal-pills">${p.signals.map(s => `<span class="signal-pill">${s}</span>`).join('')}</div>
+      </div>
+      <div class="detail-block">
+        <div class="detail-label">Core idea</div>
+        <div class="detail-val">${p.approach}</div>
+      </div>
+      <div class="detail-block" style="grid-column:1/-1">
+        <div class="detail-label">Template skeleton</div>
+        <div class="code-block">${p.template}</div>
+      </div>
+      <div class="detail-block">
+        <div class="detail-label">Classic problems</div>
+        <div class="prob-list">${p.problems.map(x => `<div class="prob-item">${x}</div>`).join('')}</div>
+      </div>
+      <div class="detail-block">
+        <div class="detail-label" style="color: var(--coral);">⚠️ Common Pitfalls</div>
+        <ul class="detail-val" style="padding-left: 16px; margin-top: 5px;">
+          ${p.pitfalls.map(pitfall => `<li style="margin-bottom: 4px;">${pitfall}</li>`).join('')}
+        </ul>
+      </div>
+      
+      ${p.exampleProblem ? `
+      <div class="detail-problem">
+        <div class="detail-label" style="color: var(--blue);">LeetCode Example (C Language)</div>
+        <div class="dp-head">${p.exampleProblem.title}</div>
+        <div class="dp-desc">${p.exampleProblem.desc}</div>
+        <pre class="dp-code"><code>${p.exampleProblem.ccode}</code></pre>
+        <div class="dp-exp"><strong>Why this works:</strong> ${p.exampleProblem.explanation}</div>
+        
+        ${p.exampleProblem.visualization ? `
+        <div class="dp-vis-title">Step-by-Step Visualization</div>
+        <div class="dp-vis">${p.exampleProblem.visualization}</div>
+        ` : ''}
+        
+        ${p.exampleProblem.codeOutput ? `
+        <div class="dp-out-title">Execution Trace Logs</div>
+        <pre class="dp-out">${p.exampleProblem.codeOutput}</pre>
+        ` : ''}
+      </div>` : ''}
+    </div>`;
+  document.getElementById('detail-panel-wrap').style.display = 'block';
+  document.getElementById('detail-panel-wrap').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ─── RENDER RECONCILE ───
+function renderReconcile() {
+  const colors = ['sn-purple','sn-green','sn-blue','sn-amber'];
+  document.getElementById('reconcile-steps').innerHTML = reconcileSteps.map((s,i) => `
+    <div class="step-card">
+      <div class="step-num-row">
+        <div class="step-num ${colors[i]}">${s.num}</div>
+        <div class="step-name-txt">${s.name}</div>
+      </div>
+      <div class="step-desc">${s.desc}</div>
+      <div class="step-checklist">${s.checks.map(c => `<div class="step-check">${c}</div>`).join('')}</div>
+    </div>`).join('');
+}
+
+// ─── RENDER RECALL ───
+function renderRecall() {
+  document.getElementById('recall-steps').innerHTML = recallSteps.map(s => `
+    <div class="recall-card">
+      <div class="recall-num">${s.num}</div>
+      <div class="recall-content">
+        <div class="recall-title">${s.title}</div>
+        <div class="recall-desc">${s.desc}</div>
+        ${s.pills.length ? `<div class="recall-list">${s.pills.map(p=>`<span class="recall-pill">${p}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ─── DRILL ───
+let drillIdx = 0, drillScore = 0, drillAnswered = false;
+let drillOrder = [];
+
+function initDrill() {
+  drillOrder = [...Array(drillQuestions.length).keys()].sort(() => Math.random() - 0.5);
+  drillIdx = 0; drillScore = 0;
+  renderDrill();
+}
+
+function renderDrill() {
+  const wrap = document.getElementById('drill-wrap');
+  if (drillIdx >= drillQuestions.length) {
+    const pct = Math.round(drillScore / drillQuestions.length * 100);
+    wrap.innerHTML = `
+      <div class="drill-complete">
+        <div class="drill-score-big">${drillScore}/${drillQuestions.length}</div>
+        <div class="drill-complete-sub">${pct}% accuracy · ${pct >= 80 ? 'Strong pattern recognition.' : pct >= 60 ? 'Getting there — review the patterns you missed.' : 'Keep drilling. Repetition is the mechanism.'}</div>
+        <button class="drill-restart" onclick="initDrill()">Restart drill ↺</button>
+      </div>`;
+    return;
+  }
+  drillAnswered = false;
+  const q = drillQuestions[drillOrder[drillIdx]];
+  const pct = Math.round(drillIdx / drillQuestions.length * 100);
+  wrap.innerHTML = `
+    <div class="drill-progress-row">
+      <div class="drill-progress-bar"><div class="drill-progress-fill" style="width:${pct}%"></div></div>
+      <span class="drill-progress-label">${drillIdx} / ${drillQuestions.length}</span>
+    </div>
+    <div class="drill-card">
+      <div class="drill-qnum">QUESTION ${drillIdx + 1}</div>
+      <div class="drill-question">${q.q}</div>
+      <div class="drill-options">
+        ${q.choices.map((c,i) => `<button class="drill-opt" id="opt-${i}" onclick="checkDrill(${i})">${c}</button>`).join('')}
+      </div>
+      <div class="drill-feedback" id="drill-fb"></div>
+      <div class="drill-footer">
+        <span class="drill-score">Score: ${drillScore} / ${drillIdx}</span>
+        <button class="drill-next" id="drill-next" onclick="nextDrill()">Next question →</button>
+      </div>
+    </div>`;
+}
+
+function checkDrill(chosen) {
+  if (drillAnswered) return;
+  drillAnswered = true;
+  const q = drillQuestions[drillOrder[drillIdx]];
+  if (chosen === q.ans) drillScore++;
+  for (let i = 0; i < q.choices.length; i++) {
+    const btn = document.getElementById('opt-' + i);
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add('correct');
+    else if (i === chosen && chosen !== q.ans) btn.classList.add('wrong');
+  }
+  const fb = document.getElementById('drill-fb');
+  fb.innerHTML = `<strong>${chosen === q.ans ? '✓ Correct — ' : '✗ Wrong — '}${q.choices[q.ans]}.</strong> ${q.why}`;
+  fb.classList.add('show');
+  document.getElementById('drill-next').classList.add('show');
+}
+
+function nextDrill() { drillIdx++; renderDrill(); }
+
+// ─── CHEAT SHEET ───
+function renderCheatsheet() {
+  document.getElementById('cs-table').innerHTML = `
+    <thead><tr><th>Pattern</th><th>Time</th><th>Space</th><th>Use when</th></tr></thead>
+    <tbody>${patterns.map(p=>`<tr>
+      <td><span class="pcard-tag tag-${p.tag}" style="margin-right:8px">${p.tag}</span><span class="pname">${p.name}</span></td>
+      <td class="tc">${p.time}</td>
+      <td class="tc" style="color:var(--green)">${p.space}</td>
+      <td class="when">${p.hint}</td>
+    </tr>`).join('')}</tbody>`;
+
+  const signals = [
+    ['contiguous subarray / substring','Sliding Window'],
+    ['sorted array + pair/triplet sum','Two Pointers'],
+    ['shortest path / minimum steps','BFS'],
+    ['all combinations / permutations / subsets','DFS / Backtracking'],
+    ['kth largest/smallest or top-k','Heap'],
+    ['count ways / min cost (overlapping subproblems)','Dynamic Programming (1D)'],
+    ['two strings or grid paths','Dynamic Programming (2D)'],
+    ['prefix lookup / autocomplete / wildcard','Trie'],
+    ['"next greater" / "next smaller"','Monotonic Stack'],
+    ['dynamic connectivity / friend groups','Union-Find'],
+    ['merge / insert / overlap / scheduling','Intervals'],
+    ['O(log n) search or minimize-the-max','Binary Search'],
+    ['complement exists / frequency / grouping','HashMap / HashSet'],
+    ['BST property / path sum / LCA','Tree Traversal / DFS'],
+    ['subarray sum queries / difference array', 'Prefix Sum'],
+    ['linked list cycle / middle element', 'Fast & Slow Pointers'],
+    ['prerequisites / dependency scheduling', 'Topological Sort'],
+    ['reverse linked list / pointers in-place', 'In-place Reversal'],
+    ['bitwise XOR / single number / power of 2', 'Bit Manipulation'],
+  ];
+
+  document.getElementById('signal-grid').innerHTML = signals.map(([sig, pat]) => `
+    <div class="signal-card">
+      <div class="signal-phrase">"${sig}"</div>
+      <div class="signal-pattern">${pat}</div>
+    </div>`).join('');
+}
+
+// ─── NAV ───
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const map = { recognize:0, reconcile:1, recall:2, drill:3, cheatsheet:4, glossary:5 };
+  btns[map[name]].classList.add('active');
+}
+
+// ─── INIT ───
+renderPatterns();
+renderReconcile();
+renderRecall();
+initDrill();
+renderCheatsheet();
+renderGlossary();
+</script>
+</body>
+</html>
